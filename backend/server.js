@@ -60,10 +60,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('✅ MongoDB Atlas Connected'))
 .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
