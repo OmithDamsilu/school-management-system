@@ -274,136 +274,106 @@
         });
 
         // Form submission with API config
-        signupForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-
-            // Get form values
-            const fullname = document.getElementById('fullname').value;
-            const email = document.getElementById('email').value;
-            const username = document.getElementById('username').value;
-            const mainRole = mainRoleSelect.value;
-            const password = passwordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-            const termsAccepted = document.getElementById('terms').checked;
-
-            // Validation
-            if (!fullname || !email || !username || !mainRole || !password || !confirmPassword) {
-                errorMessage.textContent = 'Please fill in all required fields';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
-            // Validate sub-roles
-            let roleDetails = '';
-            if (mainRole === 'principles') {
-                const principlesRole = document.getElementById('principlesRole').value;
-                if (!principlesRole) {
-                    errorMessage.textContent = 'Please select your position';
-                    errorMessage.style.display = 'block';
-                    return;
-                }
-                roleDetails = principlesRole.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            } else if (mainRole === 'sectional-heads') {
-                const sectionalGrade = document.getElementById('sectionalGrade').value;
-                if (!sectionalGrade) {
-                    errorMessage.textContent = 'Please enter the grade of your section';
-                    errorMessage.style.display = 'block';
-                    return;
-                }
-                roleDetails = `Sectional Head - ${sectionalGrade}`;
-            } else if (mainRole === 'teachers') {
-                const teacherType = document.getElementById('teacherType').value;
-                if (!teacherType) {
-                    errorMessage.textContent = 'Please select teacher type';
-                    errorMessage.style.display = 'block';
-                    return;
-                }
-                if (teacherType === 'class-teacher') {
-                    const teacherClass = document.getElementById('teacherClass').value;
-                    if (!teacherClass) {
-                        errorMessage.textContent = 'Please enter your class';
-                        errorMessage.style.display = 'block';
-                        return;
-                    }
-                    roleDetails = `Class Teacher - ${teacherClass}`;
-                } else {
-                    const labGrade = document.getElementById('labGrade').value;
-                    if (!labGrade) {
-                        errorMessage.textContent = 'Please enter laboratory grade';
-                        errorMessage.style.display = 'block';
-                        return;
-                    }
-                    roleDetails = `Laboratory Assistance - ${labGrade}`;
-                }
-            } else if (mainRole === 'non-academic') {
-                const nonAcademicRole = document.getElementById('nonAcademicRole').value;
-                if (!nonAcademicRole) {
-                    errorMessage.textContent = 'Please select staff type';
-                    errorMessage.style.display = 'block';
-                    return;
-                }
-                roleDetails = nonAcademicRole.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            }
-
-            if (password.length < 8) {
-                errorMessage.textContent = 'Password must be at least 8 characters long';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                errorMessage.textContent = 'Passwords do not match';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
-            if (!termsAccepted) {
-                errorMessage.textContent = 'Please accept the terms and conditions';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                errorMessage.textContent = 'Please enter a valid email address';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
-            // Send to API using apiCall helper
-            try {
-                const data = await apiCall(API_CONFIG.ENDPOINTS.SIGNUP, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        fullname,
-                        email,
-                        username,
-                        password,
-                        mainRole,
-                        roleDetails
-                    })
-                });
-
-                if (data.success) {
-                    successMessage.textContent = `Account created successfully as ${roleDetails}! Redirecting to login...`;
-                    successMessage.style.display = 'block';
-
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                } else {
-                    errorMessage.textContent = data.message;
-                    errorMessage.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Signup error:', error);
-                errorMessage.textContent = error.message || 'Network error. Please try again.';
-                errorMessage.style.display = 'block';
-            }
+// Signup form submission
+signupForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Hide previous messages
+    errorMessage.style.display = 'none';
+    successMessage.style.display = 'none';
+    
+    // Get form values
+    const fullname = document.getElementById('fullname').value;
+    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const phone = document.getElementById('phone').value;
+    
+    // Validate passwords match
+    if (password !== confirmPassword) {
+        errorMessage.textContent = 'Passwords do not match!';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // Get role information
+    const mainRole = document.getElementById('mainRole').value;
+    let role = '';
+    let section = '';
+    let grade = '';
+    
+    // Map the complex role system to backend's simple role field
+    if (mainRole === 'principles') {
+        const principlesRole = document.getElementById('principlesRole').value;
+        if (principlesRole === 'principle') {
+            role = 'Principal';
+        } else {
+            role = 'Management Staff';
+        }
+    } else if (mainRole === 'sectional-heads') {
+        role = 'Section Head';
+        grade = document.getElementById('sectionalGrade').value;
+        section = document.getElementById('sectionalSection').value;
+    } else if (mainRole === 'teachers') {
+        role = 'Class Teacher';
+        grade = document.getElementById('teacherGrade').value;
+        section = document.getElementById('teacherSection').value;
+    } else if (mainRole === 'non-academic') {
+        const nonAcademicRole = document.getElementById('nonAcademicRole').value;
+        if (nonAcademicRole === 'worker') {
+            role = 'Worker';
+        } else {
+            role = 'Non-Academic Staff';
+        }
+        section = document.getElementById('nonAcademicSection').value || '';
+    }
+    
+    // Validate role is selected
+    if (!role) {
+        errorMessage.textContent = 'Please select a role';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // Prepare data object with correct field names for backend
+    const userData = {
+        fullName: fullname,  // Backend expects 'fullName' (camelCase)
+        email: email,
+        username: username,
+        password: password,
+        role: role,          // Simple role string
+        section: section || '',
+        grade: grade || '',
+        phone: phone || ''
+    };
+    
+    console.log('Sending signup data:', userData); // For debugging
+    
+    try {
+        const response = await apiCall(API_CONFIG.ENDPOINTS.SIGNUP, {
+            method: 'POST',
+            body: JSON.stringify(userData)
         });
+
+        if (response.success) {
+            successMessage.textContent = response.message + ' Redirecting to login...';
+            successMessage.style.display = 'block';
+            
+            // Redirect to login page after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        } else {
+            errorMessage.textContent = response.message;
+            errorMessage.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Signup error:', error);
+        errorMessage.textContent = error.message || 'Network error. Please try again.';
+        errorMessage.style.display = 'block';
+    }
+});
 
         // Custom cursor
         document.addEventListener('DOMContentLoaded', () => {
