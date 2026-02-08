@@ -1,7 +1,7 @@
 // API Configuration
 const API_CONFIG = {
     // Change this to your Render backend URL after deployment
-    BASE_URL: 'http://localhost:5000', // For local development
+    BASE_URL: 'https://school-management-system-wico.onrender.com', // For local development
     // BASE_URL: 'https://your-backend-url.onrender.com', // For production
     
     ENDPOINTS: {
