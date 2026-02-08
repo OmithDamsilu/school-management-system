@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Echo Track Schoolcore is a smart web platform for managing school waste, resources, and unused spaces to create a cleaner and more sustainable learning environment.">
+    <meta property="og:title" content="Echo Track Schoolcore - Digitally manage waste, space & resources">
+    <meta property="og:description" content="EchoTrack Schoolcore is a smart web-based platform that helps schools track waste, manage resources, and optimize unused spaces to create cleaner, safer, and more sustainable learning environments.">
+    <meta property="og:type" content="website">
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/navbar-dropdown.css">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/web logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/web logo.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
+    
+    <title>Terms & Conditions | Echo Track Schoolcore</title>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/web logo.png" alt="Logo Echo Track">
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="About.html">About Echo Track!</a></li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary">Login</a>
+                <a href="signup.html" class="btn btn-primary">Sign Up</a>
+            </div>
+
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero-section">
+            <div class="center-wrapper">
+                <div class="glass-box-2">
+                    <h1>Terms & Conditions</h1>
+                
+                    <p>1. Introduction These terms and conditions govern the use of the Smart School Resource and Waste Management System (SSRWMS), a web-based platform designed to assist Anuradhapura Central College and other adopting schools in managing waste disposal, school resources, and unused spaces.</p>
+                    
+                    <p>2. User Roles and Account Responsibilities Access to the system is role-based to ensure accountability:</p>
+                    <ul>
+                        <li>Class Teachers: Responsible for accurate weekly or monthly data entry regarding classroom-level waste practices.</li>
+                        <li>Section Heads: Responsible for reviewing section-level performance and monitoring progress.</li>
+                        <li>School Management: Granted access to comprehensive dashboards and reports for data-driven decision-making.</li>
+                        <li>Security: Users are responsible for maintaining the confidentiality of their login credentials. The system employs bcrypt password hashing to secure user accounts.</li>
+                    </ul>
+                    
+                    <p>3. Acceptable Use of the Platform</p>
+                    <ul>
+                        <li>Data Accuracy: Users must provide truthful and accurate data regarding waste monitoring and resource inventories (e.g., desks, chairs, and lab equipment).</li>
+                        <li>Photo Reporting: Photo-based reporting of unused areas or resources must be strictly related to school management and safety assessments.</li>
+                        <li>Prohibited Conduct: Users may not use the platform for any purpose other than school-related resource and waste management.</li>
+                    </ul>
+                    
+                    <p>4. Data Management and Privacy</p>
+                    <ul>
+                        <li>Data Purpose: Collected data is used to generate class-wise statistics, automated monthly reports, and to facilitate the "Motivation & Reward System".</li>
+                        <li>Storage: Data, including images uploaded via the platform, is hosted on cloud platforms such as InfinityFree or Cloudflare Pages.</li>
+                        <li>Resource Tracking: The system will maintain a digital inventory of school assets, categorized as repairable, reusable, or recyclable.</li>
+                    </ul>
+                    
+                    <p>5. Limitation of Liability</p>
+                    <ul>
+                        <li>Operational Role: The SSRWMS is a tool for planning, monitoring, and synchronization; it does not replace the physical cleaning staff or manual labor required for waste disposal.</li>
+                        <li>Service Availability: While the system aims for regular synchronization and dashboard refreshes, continuous uptime is not guaranteed as it utilizes free or low-cost cloud platforms.</li>
+                    </ul>
+                    
+                    <p>6. Intellectual Property The SSRWMS platform, including its unique integration of waste and resource management, remains the intellectual property of ACC Vertex Developers.</p>
+                    
+                    <p>7. Modifications to the Service Future enhancements, such as advanced analytics dashboards, notification systems, or mobile-friendly interfaces, may be added and will be subject to these terms.</p>
+                    
+                    <p>8. Termination of Access The school administration reserves the right to suspend or terminate a user's access to the system if these terms are violated or if the user no longer holds an active role within the school</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolCore. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const navbar = document.querySelector('.navbar');
+        let lastScrollTop = 0;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.createElement('div');
+            cursor.className = 'custom-cursor';
+            document.body.appendChild(cursor);
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        });
+    </script>
+
+    <script src="js/auth-navbar.js"></script>
+
+</body>
+
+</html>

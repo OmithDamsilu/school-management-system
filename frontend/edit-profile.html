@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Edit Profile - Echo Track Schoolcore">
+    <meta property="og:title" content="Edit Profile | Echo Track Schoolcore">
+    
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/navbar-dropdown.css">
+    <link rel="stylesheet" href="css/edit-profile.css">
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/web logo.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
+    
+    <title>Edit Profile | Echo Track Schoolcore</title>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/web logo.png" alt="Logo Echo Track">
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading profile...</p>
+    </div>
+
+    <!-- Main Content -->
+    <main class="edit-profile-page">
+        <div class="edit-profile-container">
+            <div class="page-header">
+                <h1>✏️ Edit Profile</h1>
+                <p>Update your personal account information</p>
+            </div>
+
+            <form id="editProfileForm">
+                <!-- Basic Information -->
+                <section class="form-section">
+                    <h2>Basic Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="fullname">Full Name *</label>
+                        <input type="text" id="fullname" name="fullname" required placeholder="Enter your full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" readonly placeholder="Username (read-only)">
+                        <small class="help-text">Username cannot be changed</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mainRole">Role</label>
+                        <input type="text" id="mainRole" name="mainRole" readonly placeholder="Your role">
+                        <small class="help-text">Role cannot be changed</small>
+                    </div>
+                </section>
+
+                <!-- Profile Photo (Optional) -->
+                <section class="form-section">
+                    <h2>Profile Photo (Optional)</h2>
+                    
+                    <div class="photo-upload-container">
+                        <div class="current-photo">
+                            <div class="avatar-preview">
+                                <span id="avatarPreview">U</span>
+                            </div>
+                            <p>Current Photo</p>
+                        </div>
+                        
+                        <div class="photo-upload-info">
+                            <p class="info-text">📸 Profile photo feature coming soon!</p>
+                            <small>You'll be able to upload and change your profile photo in a future update.</small>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Additional Details (Optional) -->
+                <section class="form-section">
+                    <h2>Additional Details (Optional)</h2>
+                    
+                    <div class="form-group">
+                        <label for="department">Department / Section</label>
+                        <input type="text" id="department" name="department" placeholder="Enter your department">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactNumber">Contact Number</label>
+                        <input type="tel" id="contactNumber" name="contactNumber" placeholder="Enter contact number (optional)">
+                    </div>
+                </section>
+
+                <!-- Account Info (Read-only) -->
+                <section class="form-section readonly-section">
+                    <h2>Account Information</h2>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Account Created</label>
+                            <p id="accountCreated">-</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Total Uploads</label>
+                            <p id="totalUploads">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Messages -->
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='profile.html'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolHub. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/auth-navbar.js"></script>
+    <script src="js/edit-profile.js"></script>
+
+    <script>
+        // Custom cursor
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.createElement('div');
+            cursor.className = 'custom-cursor';
+            document.body.appendChild(cursor);
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        });
+
+        // Navbar hide/show on scroll
+        const navbar = document.querySelector('.navbar');
+        let lastScrollTop = 0;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

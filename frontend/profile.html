@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Echo Track Schoolcore</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="icon" type="image/png" href="images/web logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/web logo.png" alt="Echo Track Logo">
+                    </a>
+                </div>
+            </div>
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="profile.html" class="active">Profile</a></li>
+                    <li id="dashboardLink" style="display: none;"><a href="dashborard.html">Dashboard</a></li>
+                </ul>
+            </div>
+            <div class="nav-buttons">
+                <button onclick="logout()" class="btn btn-primary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-page">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-picture-section">
+                    <img id="profilePicture" src="images/web logo.png" alt="Profile Picture" class="profile-picture">
+                    <a href="upload-profile-picture.html" class="edit-picture-btn">Change Picture</a>
+                </div>
+                <div class="profile-info">
+                    <h1 id="userName">Loading...</h1>
+                    <p class="role-badge" id="userRole"></p>
+                    <p class="user-email" id="userEmail"></p>
+                </div>
+            </div>
+
+            <!-- Profile Details -->
+            <div class="profile-details">
+                <div class="detail-group">
+                    <label>Username</label>
+                    <p id="username"></p>
+                </div>
+                <div class="detail-group">
+                    <label>Phone</label>
+                    <p id="userPhone"></p>
+                </div>
+                <div class="detail-group" id="sectionGroup" style="display: none;">
+                    <label>Section</label>
+                    <p id="userSection"></p>
+                </div>
+                <div class="detail-group" id="gradeGroup" style="display: none;">
+                    <label>Grade</label>
+                    <p id="userGrade"></p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="profile-actions">
+                <a href="edit-profile.html" class="btn btn-primary">Edit Profile</a>
+                <a href="change-password.html" class="btn btn-secondary">Change Password</a>
+                <a href="settings.html" class="btn btn-secondary">Settings</a>
+            </div>
+
+            <!-- Entry Forms Section (Only for authorized users) -->
+            <div id="entryFormsSection" class="entry-forms-section" style="display: none;">
+                <h2>Data Entry Forms</h2>
+                <p class="section-description">Submit daily waste, weekly resources, and unused space reports</p>
+                
+                <div class="forms-grid">
+                    <div class="form-card">
+                        <div class="form-icon">🗑️</div>
+                        <h3>Daily Waste Entry</h3>
+                        <p>Track classroom waste and cleanliness</p>
+                        <a href="daily-waste-entry.html" class="btn btn-primary">Enter Data</a>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-icon">📊</div>
+                        <h3>Weekly Resources</h3>
+                        <p>Report on desks, chairs, and equipment</p>
+                        <a href="weekly-resources-entry.html" class="btn btn-primary">Enter Data</a>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-icon">🏢</div>
+                        <h3>Unused Space Report</h3>
+                        <p>Identify and document unused areas</p>
+                        <a href="unused-space-entry.html" class="btn btn-primary">Enter Data</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Worker Message -->
+            <div id="workerMessage" class="info-message" style="display: none;">
+                <p>ℹ️ As a Worker, you can view your profile but cannot submit data entry forms. Please contact your supervisor if you need to make changes.</p>
+            </div>
+
+            <!-- Management Dashboard Link -->
+            <div id="managementSection" class="management-section" style="display: none;">
+                <h2>Management Dashboard</h2>
+                <p class="section-description">View all submitted data and generate reports</p>
+                <a href="dashborard.html" class="btn btn-primary btn-large">View Dashboard</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolHub. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script>
+        // Protect this page - require authentication
+        if (!requireAuth()) {
+            // redirected to login
+        }
+
+        // Load user profile
+        async function loadProfile() {
+            try {
+                const data = await apiCall(API_CONFIG.ENDPOINTS.PROFILE);
+                
+                if (data.success) {
+                    const user = data.user;
+                    
+                    // Store user data
+                    localStorage.setItem('userData', JSON.stringify(user));
+                    
+                    // Update profile UI
+                    document.getElementById('userName').textContent = user.fullName;
+                    document.getElementById('userRole').textContent = user.role;
+                    document.getElementById('userEmail').textContent = user.email;
+                    document.getElementById('username').textContent = user.username;
+                    document.getElementById('userPhone').textContent = user.phone || 'Not provided';
+                    
+                    // Show section if applicable
+                    if (user.section) {
+                        document.getElementById('sectionGroup').style.display = 'block';
+                        document.getElementById('userSection').textContent = user.section;
+                    }
+                    
+                    // Show grade if applicable
+                    if (user.grade) {
+                        document.getElementById('gradeGroup').style.display = 'block';
+                        document.getElementById('userGrade').textContent = user.grade;
+                    }
+                    
+                    // Show profile picture if available
+                    if (user.profilePicture) {
+                        document.getElementById('profilePicture').src = user.profilePicture;
+                    }
+                    
+                    // Show/hide sections based on role
+                    handleRoleBasedAccess(user.role);
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Failed to load profile. Please try again.');
+            }
+        }
+
+        // Handle role-based access
+        function handleRoleBasedAccess(role) {
+            const entryFormsSection = document.getElementById('entryFormsSection');
+            const workerMessage = document.getElementById('workerMessage');
+            const managementSection = document.getElementById('managementSection');
+            const dashboardLink = document.getElementById('dashboardLink');
+            
+            // Workers can only access Resources form
+            if (role === 'Worker') {
+                entryFormsSection.style.display = 'block';
+                // Hide waste and space forms for workers
+                document.querySelector('.form-card:nth-child(1)').style.display = 'none'; // Daily Waste
+                document.querySelector('.form-card:nth-child(3)').style.display = 'none'; // Unused Space
+                // Show info message
+                workerMessage.style.display = 'block';
+                document.querySelector('#workerMessage p').textContent = 'ℹ️ As a Worker, you can submit Weekly Resources reports to track furniture and equipment condition.';
+            }
+            // Principals and Management Staff see dashboard instead of entry forms
+            else if (role === 'Principal' || role === 'Management Staff') {
+                entryFormsSection.style.display = 'none';
+                managementSection.style.display = 'block';
+                dashboardLink.style.display = 'block';
+            }
+            // All other roles (Class Teacher, Section Head, Non-Academic Staff) can access all entry forms
+            else {
+                entryFormsSection.style.display = 'block';
+            }
+        }
+
+        // Load profile on page load
+        document.addEventListener('DOMContentLoaded', loadProfile);
+
+        // Navbar scroll behavior
+        const navbar = document.querySelector('.navbar');
+        let lastScrollTop = 0;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    </script>
+
+    <style>
+        .entry-forms-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(33, 163, 0, 0.05), rgba(17, 72, 20, 0.05));
+            border-radius: 15px;
+            border: 2px solid #21a300;
+        }
+
+        .entry-forms-section h2 {
+            color: #114814;
+            margin-bottom: 10px;
+        }
+
+        .section-description {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .forms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .form-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .form-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .form-card h3 {
+            color: #114814;
+            margin-bottom: 10px;
+        }
+
+        .form-card p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .info-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            margin-top: 30px;
+        }
+
+        .management-section {
+            margin-top: 40px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(33, 163, 0, 0.1), rgba(17, 72, 20, 0.1));
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #21a300;
+        }
+
+        .management-section h2 {
+            color: #114814;
+            margin-bottom: 10px;
+        }
+
+        .btn-large {
+            padding: 15px 40px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: #21a300;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+    </style>
+</body>
+</html>

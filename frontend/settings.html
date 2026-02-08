@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Settings - Echo Track Schoolcore">
+    <meta property="og:title" content="Settings | Echo Track Schoolcore">
+    
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/navbar-dropdown.css">
+    <link rel="stylesheet" href="css/settings.css">
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/web logo.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
+    
+    <title>Settings | Echo Track Schoolcore</title>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/web logo.png" alt="Logo Echo Track">
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="settings-page">
+        <div class="settings-container">
+            <div class="page-header">
+                <h1>⚙️ Settings</h1>
+                <p>Control system behavior and preferences</p>
+            </div>
+
+            <form id="settingsForm">
+                <!-- Notification Settings -->
+                <section class="form-section">
+                    <h2>Notification Settings</h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="emailNotifications">Email Notifications</label>
+                            <small>Receive email notifications for important updates</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="emailNotifications" name="emailNotifications">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="uploadAlerts">Upload Confirmation Alerts</label>
+                            <small>Get notified when uploads are processed</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="uploadAlerts" name="uploadAlerts">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Privacy Settings -->
+                <section class="form-section">
+                    <h2>Privacy Settings</h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="showOnMap">Show Uploads on Map</label>
+                            <small>Display your uploads on the public school map</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showOnMap" name="showOnMap" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="hideName">Hide Name on Public Map</label>
+                            <small>Show uploads anonymously on the map</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="hideName" name="hideName">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Default Preferences -->
+                <section class="form-section">
+                    <h2>Default Preferences</h2>
+                    
+                    <div class="form-group">
+                        <label for="defaultUploadType">Default Upload Type</label>
+                        <select id="defaultUploadType" name="defaultUploadType">
+                            <option value="garbage">🗑️ Garbage</option>
+                            <option value="unused-space">📦 Unused Space</option>
+                            <option value="resource">🔧 Resource</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="defaultMapView">Default Map View</label>
+                        <select id="defaultMapView" name="defaultMapView">
+                            <option value="satellite">🛰️ Satellite</option>
+                            <option value="street">🗺️ Street Map</option>
+                            <option value="terrain">🏔️ Terrain</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Appearance -->
+                <section class="form-section">
+                    <h2>Appearance</h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label>Theme</label>
+                            <small>Choose your preferred color theme</small>
+                        </div>
+                        <div class="theme-selector">
+                            <button type="button" class="theme-btn active" data-theme="light">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M10 3V1M10 19V17M17 10H19M1 10H3M15.66 15.66L17.07 17.07M2.93 2.93L4.34 4.34M15.66 4.34L17.07 2.93M2.93 17.07L4.34 15.66M14 10C14 12.21 12.21 14 10 14C7.79 14 6 12.21 6 10C6 7.79 7.79 6 10 6C12.21 6 14 7.79 14 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                Light
+                            </button>
+                            <button type="button" class="theme-btn" data-theme="dark">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M17 10.43C16.8 12.26 15.98 13.91 14.73 15.16C13.48 16.41 11.83 17.23 10 17.43C8.17 17.63 6.35 17.22 4.81 16.27C3.27 15.32 2.09 13.89 1.47 12.19C0.85 10.49 0.82 8.63 1.39 6.91C1.96 5.19 3.1 3.72 4.61 2.73C6.12 1.74 7.92 1.29 9.73 1.44C11.54 1.59 13.24 2.34 14.56 3.56C13.09 3.74 11.7 4.39 10.59 5.41C9.48 6.43 8.7 7.77 8.36 9.25C8.02 10.73 8.13 12.28 8.69 13.7C9.25 15.12 10.23 16.34 11.5 17.19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                Dark
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Account Actions -->
+                <section class="form-section danger-section">
+                    <h2>Account Actions</h2>
+                    
+                    <div class="action-item">
+                        <div class="action-info">
+                            <label>Logout from All Devices</label>
+                            <small>End all active sessions on other devices</small>
+                        </div>
+                        <button type="button" class="btn btn-warning" id="logoutAllBtn">
+                            Logout All
+                        </button>
+                    </div>
+
+                    <div class="action-item">
+                        <div class="action-info">
+                            <label>Deactivate Account</label>
+                            <small>Temporarily disable your account</small>
+                        </div>
+                        <button type="button" class="btn btn-danger" id="deactivateBtn">
+                            Deactivate
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Messages -->
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='profile.html'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolHub. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/auth-navbar.js"></script>
+    <script src="js/settings.js"></script>
+
+    <script>
+        // Custom cursor
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.createElement('div');
+            cursor.className = 'custom-cursor';
+            document.body.appendChild(cursor);
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        });
+
+        // Navbar hide/show on scroll
+        const navbar = document.querySelector('.navbar');
+        let lastScrollTop = 0;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

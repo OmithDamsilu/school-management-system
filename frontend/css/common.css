@@ -1,0 +1,566 @@
+/* ===================== GLOBAL ===================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: none;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html, body {
+    min-height: 100%;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+/* ===================== CUSTOM CURSOR ===================== */
+.custom-cursor {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    background: linear-gradient(135deg,#19f306 0%, #148200 100%);
+    transform: translate(-50%, -50%);
+}
+
+.custom-cursor::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background-color: #8beb91;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+/* ===================== BODY BACKGROUND ===================== */
+body {
+    justify-content: center;
+    background-color: #ffffff;
+    background-image: url('../images/webbg2.png');
+    background-size: 1550px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* ===================== NAVBAR ===================== */
+.navbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    padding: 1.5rem 2.5rem;
+    z-index: 1000;
+    background: rgba(240, 239, 239, 0.229);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
+}
+
+.navbar.hidden {
+    transform: translateY(-100%);
+}
+
+.nav-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ============== LOGO =================== */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo a {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.logo img {
+    width: auto;
+    height: 125px;
+    border-radius:75px;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    display: block;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.2));
+}
+
+.logo img:hover {
+    transform: scale(1.1);
+}
+
+/* ===================== NAV LINKS ===================== */
+.nav-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 0;
+    background: rgba(240, 239, 239, 0.452);
+    backdrop-filter: blur(20px);
+    padding: 0.5rem;
+    border-radius: 50px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    margin: 0;
+}
+
+.nav-links li {
+    list-style: none;
+}
+
+.nav-links a {
+    color: #3a3c3e;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    display: block;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+.nav-links a:hover {
+    color: #fff;
+    background: rgba(33, 144, 28, 0.356);
+}
+
+.nav-links a.active {
+    color: #fff;
+    background: #00be23bf;
+    backdrop-filter: blur(10px);
+}
+
+/* ===================== BUTTONS ===================== */
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    animation: fadeIn 1s ease 0.5s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: 2px solid #21a300;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background-color: #21a300;
+    color: rgb(255, 255, 255);
+    z-index: 1;
+}
+
+.btn-primary:hover {
+    background: transparent;
+    color: #21a300;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #21a300;
+    z-index: 1;
+}
+
+.btn-secondary:hover {
+    background-color: #21a300;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
+.btn-third {
+    background: transparent;
+    color: #21a300;
+    z-index: 1;
+}
+
+.btn-third:hover {
+    background-color: #21a300;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
+
+/* ===================== GLASSMORPHISM BOXES ===================== */
+.glass-box {
+    display: inline-block;
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 700px;
+    background: #ffffff6b;
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.12);
+    border: 1px solid #114814;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInScale 0.8s ease;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 150%;
+    height: 300%;
+    background: linear-gradient(45deg, transparent, rgba(144, 238, 144, 0.4), transparent);
+    transform: rotate(45deg);
+    animation: glassShine 4s linear infinite;
+}
+
+@keyframes glassShine {
+    0% { transform: rotate(45deg) translateY(-100%); }
+    100% { transform: rotate(45deg) translateY(100%); }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.glass-box:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2), 0 0 50px rgba(144, 238, 144, 0.3);
+}
+
+.glass-box h1 {
+    margin: 0 0 15px 0;
+    color: #114814;
+    font-size: 32px;
+    line-height: 1.4;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 700;
+    animation: fadeInUp 1s ease 0.3s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    position: relative;
+    z-index: 1;
+}
+
+.glass-box p {
+    margin: 0 0 15px 0;
+    color: #114814;
+    font-size: 18px;
+    line-height: 1.6;
+    font-family: 'Ubuntu', sans-serif;
+    animation: fadeInUp 1s ease 0.5s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    position: relative;
+    z-index: 1;
+}
+
+.glass-box p:last-child {
+    margin-bottom: 0;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================== GLASS BOX 2 ===================== */
+.glass-box-2 {
+    display: inline-block;
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 700px;
+    background: #ffffff6b;
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.12);
+    border: 1px solid #114814;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInScale 0.8s ease;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-box-2::before {
+    content: '';
+    position: absolute;
+    top: -200%;
+    left: -25%;
+    width: 500%;
+    height: 400%;
+    background: linear-gradient(45deg, transparent, rgba(144, 238, 144, 0.4), transparent);
+    transform: rotate(45deg);
+    animation: glassShine 3s linear infinite;
+}
+
+.glass-box-2:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2), 0 0 50px rgba(144, 238, 144, 0.3);
+}
+
+.glass-box-2 h1 {
+    margin: 0 0 15px 0;
+    color: #114814;
+    font-size: 32px;
+    line-height: 1.4;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 700;
+    animation: fadeInUp 1s ease 0.3s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    position: relative;
+    z-index: 1;
+}
+
+.glass-box-2 p {
+    margin: 0 0 15px 0;
+    color: #114814;
+    font-size: 18px;
+    line-height: 1.6;
+    font-family: 'Ubuntu', sans-serif;
+    animation: fadeInUp 1s ease 0.5s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    position: relative;
+    z-index: 1;
+}
+
+.glass-box-2 p:last-child {
+    margin-bottom: 0;
+}
+
+.glass-box-2 ul {
+    text-align: left;
+    margin: 15px 0 15px 40px;
+    padding: 0;
+    list-style-type: disc;
+    color: #114814;
+    font-size: 16px;
+    line-height: 1.8;
+    font-family: 'Ubuntu', sans-serif;
+    animation: fadeInUp 1s ease 0.6s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    position: relative;
+    z-index: 1;
+}
+
+.glass-box-2 ul ul {
+    margin: 10px 0 10px 30px;
+    list-style-type: circle;
+    font-size: 15px;
+}
+
+.glass-box-2 li {
+    margin-bottom: 8px;
+}
+
+.glass-box-2 .warning {
+    color: #d84315;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+/* ===================== UTILITY CLASSES ===================== */
+.center-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+    padding: 0 20px;
+}
+/* ===================== FOOTER ===================== */
+footer {
+    background-color: transparent;
+    padding: 40px 20px;
+    margin-top: 80px;
+    border-top: 1px solid #8d96a3;
+    animation: fadeInUp 1s ease;
+    position: relative;
+}
+
+footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #64b5f6, transparent);
+    animation: borderGlow 3s ease infinite;
+}
+
+@keyframes borderGlow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-text {
+    font-family: 'Ubuntu', sans-serif;
+    color: #ffffff;
+    font-size: 14px;
+    animation: textPulse 3s ease infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+/* ===================== RESPONSIVE DESIGN ===================== */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .nav-center {
+        position: static;
+        transform: none;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .nav-links a {
+        text-align: center;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn {
+        flex: 1;
+    }
+
+    .glass-box, .glass-box-2 {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    .glass-box h1, .glass-box-2 h1 {
+        font-size: 24px;
+    }
+
+    .glass-box p, .glass-box-2 p {
+        font-size: 16px;
+    }
+
+    .glass-box-2 ul {
+        font-size: 14px;
+        margin: 15px 0 15px 20px;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo img {
+        height: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 10px 15px;
+    }
+
+    .glass-box h1, .glass-box-2 h1 {
+        font-size: 20px;
+    }
+
+    .glass-box p, .glass-box-2 p {
+        font-size: 14px;
+    }
+
+    .glass-box-2 ul {
+        font-size: 13px;
+    }
+}

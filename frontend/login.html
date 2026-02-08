@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Echo Track Schoolcore is a smart web platform for managing school waste, resources, and unused spaces to create a cleaner and more sustainable learning environment.">
+    <meta property="og:title" content="Echo Track Schoolcore - Digitally manage waste, space & resources">
+    <meta property="og:description" content="EchoTrack Schoolcore is a smart web-based platform that helps schools track waste, manage resources, and optimize unused spaces to create cleaner, safer, and more sustainable learning environments.">
+    <meta property="og:type" content="website">
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/login.css">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/web logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/web logo.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
+    
+    <title>Login | Echo Track Schoolcore</title>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/web logo.png" alt="Logo Echo Track">
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="signup.html" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Welcome Back</h1>
+                <p>Please login to your account</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username or Email</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter your username or email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+
+                <div class="remember-forgot">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-btn">Login</button>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+            </form>
+
+            <div class="signup-link">
+                Don't have an account? <a href="signup.html">Sign up</a>
+            </div>
+
+            <div class="contact-link">
+                <a href="instruction.html">Instruction</a> for signup
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolHub. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Import config.js -->
+    <script src="js/config.js"></script>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const navbar = document.querySelector('.navbar');
+        let lastScrollTop = 0;
+
+        // Hide/Show navbar on scroll
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+
+        // Login form submission with API config
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            try {
+                const data = await apiCall(API_CONFIG.ENDPOINTS.LOGIN, {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (data.success) {
+                    successMessage.textContent = data.message + ' Redirecting to your profile...';
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect to profile page after 1.5 seconds
+                    setTimeout(() => {
+                        window.location.href = 'profile.html';
+                    }, 1500);
+                } else {
+                    errorMessage.textContent = data.message;
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message || 'Network error. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Custom cursor
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.createElement('div');
+            cursor.className = 'custom-cursor';
+            document.body.appendChild(cursor);
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        });
+    </script>
+</body>
+</html>

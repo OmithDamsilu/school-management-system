@@ -1,0 +1,201 @@
+/* ===================== PROFILE DROPDOWN ===================== */
+.profile-dropdown {
+    position: relative;
+}
+
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: rgba(240, 239, 239, 0.452);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #3a3c3e;
+}
+
+.profile-btn:hover {
+    background: rgba(92, 246, 141, 0.223);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-avatar-small {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #41ed3b 0%, #099f04 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-avatar-small span {
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.profile-name {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.profile-btn:hover svg {
+    transform: translateY(2px);
+}
+
+/* ===================== DROPDOWN MENU ===================== */
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 280px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.98);
+    border-left: 1px solid rgba(139, 92, 246, 0.15);
+    border-top: 1px solid rgba(139, 92, 246, 0.15);
+    transform: rotate(45deg);
+}
+
+.dropdown-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dropdown-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dropdown-user-info strong {
+    font-size: 16px;
+    color: #333;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.dropdown-user-info span {
+    font-size: 13px;
+    color: #666;
+    font-family: 'Poppins', sans-serif;
+}
+
+.user-role {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 12px;
+    background: rgba(33, 163, 0, 0.1);
+    color: #21a300;
+    border-radius: 12px;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    width: fit-content;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.08);
+    margin: 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    color: #333;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: rgba(33, 163, 0, 0.08);
+    color: #21a300;
+}
+
+.dropdown-item svg {
+    flex-shrink: 0;
+}
+
+.logout-item {
+    color: #dc3545;
+}
+
+.logout-item:hover {
+    background: rgba(220, 53, 69, 0.08);
+    color: #dc3545;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 768px) {
+    .profile-name {
+        display: none;
+    }
+
+    .profile-btn {
+        padding: 8px 12px;
+    }
+
+    .dropdown-menu {
+        right: -10px;
+        min-width: 260px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dropdown-menu {
+        position: fixed;
+        top: auto;
+        right: 10px;
+        left: 10px;
+        width: calc(100% - 20px);
+        min-width: auto;
+    }
+
+    .dropdown-menu::before {
+        display: none;
+    }
+}

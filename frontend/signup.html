@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Echo Track Schoolhub is a smart web platform for managing school waste, resources, and unused spaces to create a cleaner and more sustainable learning environment.">
+    <meta property="og:title" content="Echo Track Schoolhub - Digitally manage waste, space & resources">
+    <meta property="og:description" content="EchoTrack School Hub is a smart web-based platform that helps schools track waste, manage resources, and optimize unused spaces to create cleaner, safer, and more sustainable learning environments.">
+    <meta property="og:type" content="website">
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/signup.css">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/web logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/web logo.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
+    <title>Sign Up | Echo Track Schoolcore</title>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/web logo.png" alt="Logo Echo Track">
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="signup-page">
+        <div class="signup-container">
+            <div class="signup-header">
+                <h1>Create Account</h1>
+                <p>Join Echo Track SchoolHub today</p>
+            </div>
+
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Choose a username">
+                </div>
+
+                <!-- Main Role Selection -->
+                <div class="form-group">
+                    <label for="mainRole">Main Role</label>
+                    <select id="mainRole" name="mainRole" required>
+                        <option value="" disabled selected>Select your main role</option>
+                        <option value="principles">Principles</option>
+                        <option value="sectional-heads">Sectional Heads</option>
+                        <option value="teachers">Teachers</option>
+                        <option value="non-academic">Non-Academic Staff</option>
+                    </select>
+                </div>
+
+                <!-- Sub-role for Principles -->
+                <div class="form-group sub-role-group" id="principlesGroup" style="display: none;">
+                    <label for="principlesRole">Position</label>
+                    <select id="principlesRole" name="principlesRole">
+                        <option value="" disabled selected>Select position</option>
+                        <option value="principle">Principle</option>
+                        <option value="deputy-principle">Deputy Principle</option>
+                        <option value="assistance-principle">Assistance Principle</option>
+                    </select>
+                </div>
+
+                <!-- Sub-role for Sectional Heads -->
+                <div class="form-group sub-role-group" id="sectionalHeadsGroup" style="display: none;">
+                    <label for="sectionalGrade">Grade of Section</label>
+                    <input type="text" id="sectionalGrade" name="sectionalGrade" placeholder="Enter grade (e.g., Grade 10, Grade 11)">
+                </div>
+
+                <!-- Sub-role for Teachers -->
+                <div class="form-group sub-role-group" id="teachersGroup" style="display: none;">
+                    <label for="teacherType">Teacher Type</label>
+                    <select id="teacherType" name="teacherType">
+                        <option value="" disabled selected>Select teacher type</option>
+                        <option value="class-teacher">Class Teacher</option>
+                        <option value="laboratory-assistance">Laboratory Assistance</option>
+                    </select>
+                </div>
+
+                <!-- Sub-field for Class Teacher -->
+                <div class="form-group sub-role-group" id="classTeacherGroup" style="display: none;">
+                    <label for="teacherClass">Class</label>
+                    <input type="text" id="teacherClass" name="teacherClass" placeholder="Enter class (e.g., 10A, 11B)">
+                </div>
+
+                <!-- Sub-field for Laboratory Assistance -->
+                <div class="form-group sub-role-group" id="labAssistanceGroup" style="display: none;">
+                    <label for="labGrade">Laboratory Grade</label>
+                    <input type="text" id="labGrade" name="labGrade" placeholder="Enter laboratory grade">
+                </div>
+
+                <!-- Sub-role for Non-Academic Staff -->
+                <div class="form-group sub-role-group" id="nonAcademicGroup" style="display: none;">
+                    <label for="nonAcademicRole">Staff Type</label>
+                    <select id="nonAcademicRole" name="nonAcademicRole">
+                        <option value="" disabled selected>Select staff type</option>
+                        <option value="management-staff">Management Staff</option>
+                        <option value="workers">Workers</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Create a password">
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-bar">
+                            <div class="strength-bar-fill" id="strengthBar"></div>
+                        </div>
+                        <p id="strengthText"></p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password">
+                </div>
+
+                <div class="terms-group">
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">
+                            I agree to the <a href="T & C.html">Terms and Conditions</a> and <a href="PP.html">Privacy Policy</a>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="signup-btn">Create Account</button>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+            </form>
+
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolHub. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Import config.js -->
+    <script src="js/config.js"></script>
+
+    <script>
+        const signupForm = document.getElementById('signupForm');
+        const mainRoleSelect = document.getElementById('mainRole');
+        const teacherTypeSelect = document.getElementById('teacherType');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const navbar = document.querySelector('.navbar');
+        let lastScrollTop = 0;
+
+        // Hide/Show navbar on scroll
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+
+        // Sub-role visibility logic
+        mainRoleSelect.addEventListener('change', function() {
+            document.querySelectorAll('.sub-role-group').forEach(group => {
+                group.style.display = 'none';
+            });
+
+            const selectedRole = this.value;
+            if (selectedRole === 'principles') {
+                document.getElementById('principlesGroup').style.display = 'block';
+            } else if (selectedRole === 'sectional-heads') {
+                document.getElementById('sectionalHeadsGroup').style.display = 'block';
+            } else if (selectedRole === 'teachers') {
+                document.getElementById('teachersGroup').style.display = 'block';
+            } else if (selectedRole === 'non-academic') {
+                document.getElementById('nonAcademicGroup').style.display = 'block';
+            }
+        });
+
+        teacherTypeSelect.addEventListener('change', function() {
+            document.getElementById('classTeacherGroup').style.display = 'none';
+            document.getElementById('labAssistanceGroup').style.display = 'none';
+
+            const selectedType = this.value;
+            if (selectedType === 'class-teacher') {
+                document.getElementById('classTeacherGroup').style.display = 'block';
+            } else if (selectedType === 'laboratory-assistance') {
+                document.getElementById('labAssistanceGroup').style.display = 'block';
+            }
+        });
+
+        // Password strength indicator
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            const passwordStrength = document.getElementById('passwordStrength');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+
+            if (password.length === 0) {
+                passwordStrength.style.display = 'none';
+                return;
+            }
+
+            passwordStrength.style.display = 'block';
+            passwordStrength.classList.remove('strength-weak', 'strength-medium', 'strength-strong');
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            strengthBar.style.width = (strength / 6 * 100) + '%';
+
+            if (strength <= 2) {
+                passwordStrength.classList.add('strength-weak');
+                strengthText.textContent = 'Weak password';
+                strengthText.style.color = '#dc3545';
+            } else if (strength <= 4) {
+                passwordStrength.classList.add('strength-medium');
+                strengthText.textContent = 'Medium password';
+                strengthText.style.color = '#ffc107';
+            } else {
+                passwordStrength.classList.add('strength-strong');
+                strengthText.textContent = 'Strong password';
+                strengthText.style.color = '#28a745';
+            }
+        });
+
+        // Form submission with API config
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Get form values
+            const fullname = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const mainRole = mainRoleSelect.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const termsAccepted = document.getElementById('terms').checked;
+
+            // Validation
+            if (!fullname || !email || !username || !mainRole || !password || !confirmPassword) {
+                errorMessage.textContent = 'Please fill in all required fields';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Validate sub-roles
+            let roleDetails = '';
+            if (mainRole === 'principles') {
+                const principlesRole = document.getElementById('principlesRole').value;
+                if (!principlesRole) {
+                    errorMessage.textContent = 'Please select your position';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                roleDetails = principlesRole.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            } else if (mainRole === 'sectional-heads') {
+                const sectionalGrade = document.getElementById('sectionalGrade').value;
+                if (!sectionalGrade) {
+                    errorMessage.textContent = 'Please enter the grade of your section';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                roleDetails = `Sectional Head - ${sectionalGrade}`;
+            } else if (mainRole === 'teachers') {
+                const teacherType = document.getElementById('teacherType').value;
+                if (!teacherType) {
+                    errorMessage.textContent = 'Please select teacher type';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                if (teacherType === 'class-teacher') {
+                    const teacherClass = document.getElementById('teacherClass').value;
+                    if (!teacherClass) {
+                        errorMessage.textContent = 'Please enter your class';
+                        errorMessage.style.display = 'block';
+                        return;
+                    }
+                    roleDetails = `Class Teacher - ${teacherClass}`;
+                } else {
+                    const labGrade = document.getElementById('labGrade').value;
+                    if (!labGrade) {
+                        errorMessage.textContent = 'Please enter laboratory grade';
+                        errorMessage.style.display = 'block';
+                        return;
+                    }
+                    roleDetails = `Laboratory Assistance - ${labGrade}`;
+                }
+            } else if (mainRole === 'non-academic') {
+                const nonAcademicRole = document.getElementById('nonAcademicRole').value;
+                if (!nonAcademicRole) {
+                    errorMessage.textContent = 'Please select staff type';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                roleDetails = nonAcademicRole.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+
+            if (password.length < 8) {
+                errorMessage.textContent = 'Password must be at least 8 characters long';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (!termsAccepted) {
+                errorMessage.textContent = 'Please accept the terms and conditions';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                errorMessage.textContent = 'Please enter a valid email address';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Send to API using apiCall helper
+            try {
+                const data = await apiCall(API_CONFIG.ENDPOINTS.SIGNUP, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        fullname,
+                        email,
+                        username,
+                        password,
+                        mainRole,
+                        roleDetails
+                    })
+                });
+
+                if (data.success) {
+                    successMessage.textContent = `Account created successfully as ${roleDetails}! Redirecting to login...`;
+                    successMessage.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    errorMessage.textContent = data.message;
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorMessage.textContent = error.message || 'Network error. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Custom cursor
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.createElement('div');
+            cursor.className = 'custom-cursor';
+            document.body.appendChild(cursor);
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        });
+    </script>
+</body>
+</html>

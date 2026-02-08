@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Echo Track Schoolcore is a smart web platform for managing school waste, resources, and unused spaces to create a cleaner and more sustainable learning environment.">
+    <meta property="og:title" content="Echo Track Schoolcore - Digitally manage waste, space & resources">
+    <meta property="og:description" content="EchoTrack Schoolcore is a smart web-based platform that helps schools track waste, manage resources, and optimize unused spaces to create cleaner, safer, and more sustainable learning environments.">
+    <meta property="og:type" content="website">
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/navbar-dropdown.css">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/web logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/web logo.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
+    
+    <title>Home | Echo Track Schoolcore</title>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/web logo.png" alt="Logo Echo Track">
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Home</a></li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons (dynamically updated) -->
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary">Login</a>
+                <a href="signup.html" class="btn btn-primary">Sign Up</a>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="center-wrapper">
+                <div class="glass-box">
+                    <h1>Welcome To Echo Track SchoolHub</h1>
+                    <p>Let's manage waste, space and resources in our school accurately!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="hero-section">
+            <div class="center-wrapper">
+                <div class="glass-box">
+                    <h1>About Us!</h1>
+
+                    <p>Welcome to the Smart School Resource and Waste Management System, developed by ACC Vertex Developers. Our platform is designed to transform schools through smart digital management, helping educators and administrators efficiently monitor and optimize school resources, waste disposal practices, and unused spaces.</p>
+
+                    <p>With a centralized web-based system, schools can track classroom waste, manage furniture and equipment inventories, and identify neglected areas, all through an intuitive dashboard and map-based interface. By combining waste management, resource tracking, and space utilization into a single platform, our system encourages cleaner, safer, and more organized school environments while promoting sustainable practices.</p>
+
+                    <p>Through role-based access, teachers, section heads, and school management can collaborate seamlessly, making data-driven decisions that enhance operational efficiency. Our goal is to empower schools to not only manage resources effectively but also to foster responsibility, motivation, and long-term sustainability among students and staff.</p>
+                </div>
+            </div>
+        </section>
+    </main> 
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolCore. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Authentication Navbar Script -->
+    <script src="js/auth-navbar.js"></script>
+
+    <!-- JavaScript for Navbar Hide/Show -->
+    <script>
+        const navbar = document.querySelector('.navbar');
+        let lastScrollTop = 0;
+
+        // Hide/Show navbar on scroll
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down
+                navbar.classList.add('hidden');
+            } else {
+                // Scrolling up
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.createElement('div');
+            cursor.className = 'custom-cursor';
+            document.body.appendChild(cursor);
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        });
+    </script>
+
+</body>
+
+</html>

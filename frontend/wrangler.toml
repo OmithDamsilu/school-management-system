@@ -1,0 +1,4 @@
+# Cloudflare Pages will automatically detect and deploy static files
+# No build command needed for static HTML/CSS/JS
+
+# Just make sure all your files are in the frontend directory

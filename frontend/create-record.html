@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Daily Record - EchoTrack</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .record-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .image-upload-section {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f9f9f9;
+            margin-bottom: 20px;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .image-preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-image-btn:hover {
+            background: rgba(255, 0, 0, 1);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #45a049;
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="record-container">
+        <h2>📝 Create Daily Record</h2>
+        
+        <div id="message" class="message"></div>
+        
+        <form id="recordForm">
+            <!-- Date -->
+            <div class="form-group">
+                <label for="recordDate">Date *</label>
+                <input type="date" id="recordDate" name="recordDate" required>
+            </div>
+            
+            <!-- Waste Type -->
+            <div class="form-group">
+                <label for="wasteType">Waste Type *</label>
+                <select id="wasteType" name="wasteType" required>
+                    <option value="">Select waste type</option>
+                    <option value="organic">Organic Waste</option>
+                    <option value="recyclable">Recyclable Waste</option>
+                    <option value="general">General Waste</option>
+                    <option value="hazardous">Hazardous Waste</option>
+                    <option value="e-waste">E-Waste</option>
+                </select>
+            </div>
+            
+            <!-- Quantity -->
+            <div class="form-group">
+                <label for="quantity">Quantity (kg) *</label>
+                <input type="number" id="quantity" name="quantity" step="0.1" min="0" required>
+            </div>
+            
+            <!-- Location -->
+            <div class="form-group">
+                <label for="location">Location *</label>
+                <input type="text" id="location" name="location" placeholder="e.g., Building A, Floor 2" required>
+            </div>
+            
+            <!-- Notes -->
+            <div class="form-group">
+                <label for="notes">Notes (Optional)</label>
+                <textarea id="notes" name="notes" placeholder="Additional information..."></textarea>
+            </div>
+            
+            <!-- Image Upload Section -->
+            <div class="form-group">
+                <label>Upload Images (Optional - Max 5 images, 5MB each)</label>
+                <div class="image-upload-section">
+                    <div class="upload-icon">📷</div>
+                    <p>Click below to select images or drag and drop</p>
+                    <input type="file" 
+                           id="imageInput" 
+                           name="images" 
+                           accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                           multiple
+                           style="display: none;">
+                    <button type="button" onclick="document.getElementById('imageInput').click()" 
+                            style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                        Select Images
+                    </button>
+                    <div class="file-info" id="fileInfo">
+                        No files selected (Maximum: 5 images, 5MB each)
+                    </div>
+                </div>
+                
+                <!-- Image Preview -->
+                <div id="imagePreviewContainer" class="image-preview-container"></div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Submit Record
+            </button>
+        </form>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        // Set today's date as default
+        document.getElementById('recordDate').valueAsDate = new Date();
+        
+        const imageInput = document.getElementById('imageInput');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const fileInfo = document.getElementById('fileInfo');
+        const recordForm = document.getElementById('recordForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageDiv = document.getElementById('message');
+        
+        let selectedFiles = [];
+        const MAX_FILES = 5;
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        
+        // Handle file selection
+        imageInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            
+            // Check number of files
+            if (selectedFiles.length + files.length > MAX_FILES) {
+                showMessage(`Maximum ${MAX_FILES} images allowed`, 'error');
+                return;
+            }
+            
+            // Validate and add files
+            files.forEach(file => {
+                // Check file size
+                if (file.size > MAX_FILE_SIZE) {
+                    showMessage(`${file.name} is too large. Maximum size is 5MB`, 'error');
+                    return;
+                }
+                
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    showMessage(`${file.name} is not a valid image type`, 'error');
+                    return;
+                }
+                
+                selectedFiles.push(file);
+            });
+            
+            updateFileInfo();
+            displayImagePreviews();
+            
+            // Reset input
+            imageInput.value = '';
+        });
+        
+        // Update file info text
+        function updateFileInfo() {
+            if (selectedFiles.length === 0) {
+                fileInfo.textContent = `No files selected (Maximum: ${MAX_FILES} images, 5MB each)`;
+            } else {
+                const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+                const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+                fileInfo.textContent = `${selectedFiles.length} file(s) selected (${totalSizeMB} MB total)`;
+            }
+        }
+        
+        // Display image previews
+        function displayImagePreviews() {
+            imagePreviewContainer.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'image-preview-item';
+                    
+                    previewDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" class="remove-image-btn" onclick="removeImage(${index})">
+                            ×
+                        </button>
+                    `;
+                    
+                    imagePreviewContainer.appendChild(previewDiv);
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Remove image
+        function removeImage(index) {
+            selectedFiles.splice(index, 1);
+            updateFileInfo();
+            displayImagePreviews();
+        }
+        
+        // Make removeImage globally accessible
+        window.removeImage = removeImage;
+        
+        // Handle form submission
+        recordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Create FormData
+            const formData = new FormData();
+            
+            // Add form fields
+            formData.append('recordDate', document.getElementById('recordDate').value);
+            formData.append('wasteType', document.getElementById('wasteType').value);
+            formData.append('quantity', document.getElementById('quantity').value);
+            formData.append('location', document.getElementById('location').value);
+            formData.append('notes', document.getElementById('notes').value);
+            
+            // Add images
+            selectedFiles.forEach((file) => {
+                formData.append('images', file);
+            });
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CREATE_RECORD('daily')}`,
+                    {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    }
+                );
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage(data.message, 'success');
+                    
+                    // Reset form
+                    recordForm.reset();
+                    selectedFiles = [];
+                    updateFileInfo();
+                    displayImagePreviews();
+                    
+                    // Set date to today again
+                    document.getElementById('recordDate').valueAsDate = new Date();
+                    
+                    // Optionally redirect after delay
+                    setTimeout(() => {
+                        // window.location.href = 'records.html';
+                    }, 2000);
+                } else {
+                    showMessage(data.message || 'Failed to submit record', 'error');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Record';
+            }
+        });
+        
+        // Show message function
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            // Scroll to message
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Check authentication on page load
+        async function checkAuth() {
+            try {
+                const data = await apiCall(API_CONFIG.ENDPOINTS.CHECK_AUTH);
+                
+                if (!data.authenticated) {
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Check auth on page load
+        checkAuth();
+    </script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+/* ===================== LOADING SPINNER ===================== */
+.loading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #21a300;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+    margin-top: 20px;
+    color: #21a300;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+}
+
+.loading-spinner.hidden {
+    display: none;
+}
+
+/* ===================== PAGE LAYOUT ===================== */
+.edit-profile-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 200px);
+    padding: 40px 20px;
+}
+
+.edit-profile-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 800px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: slideInFromBottom 0.8s ease;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes slideInFromBottom {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ===================== PAGE HEADER ===================== */
+.page-header {
+    text-align: center;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e0e0e0;
+    animation: fadeInDown 1s ease 0.3s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-header h1 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: #666;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===================== FORM SECTIONS ===================== */
+.form-section {
+    margin-bottom: 35px;
+    animation: fadeInUp 0.8s ease;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.form-section:nth-child(1) { animation-delay: 0.4s; }
+.form-section:nth-child(2) { animation-delay: 0.5s; }
+.form-section:nth-child(3) { animation-delay: 0.6s; }
+.form-section:nth-child(4) { animation-delay: 0.7s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-section h2 {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #21a300;
+}
+
+/* ===================== FORM GROUPS ===================== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #21a300;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(33, 163, 0, 0.1);
+}
+
+.form-group input:read-only {
+    background: #f5f5f5;
+    cursor: not-allowed;
+    color: #666;
+}
+
+.help-text {
+    display: block;
+    color: #999;
+    font-size: 12px;
+    margin-top: 5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===================== PHOTO UPLOAD ===================== */
+.photo-upload-container {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    padding: 20px;
+    background: rgba(33, 163, 0, 0.05);
+    border-radius: 12px;
+    border: 2px dashed rgba(33, 163, 0, 0.3);
+}
+
+.current-photo {
+    text-align: center;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #41ed3b 0%, #099f04 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 10px;
+    box-shadow: 0 5px 15px rgba(33, 163, 0, 0.3);
+}
+
+.avatar-preview span {
+    font-size: 40px;
+    color: white;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.current-photo p {
+    color: #666;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+}
+
+.photo-upload-info {
+    flex: 1;
+}
+
+.info-text {
+    color: #21a300;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.photo-upload-info small {
+    color: #666;
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===================== READ-ONLY SECTION ===================== */
+.readonly-section {
+    background: rgba(0, 0, 0, 0.02);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.info-item label {
+    display: block;
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item p {
+    color: #333;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+}
+
+/* ===================== MESSAGES ===================== */
+.error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin: 20px 0;
+    padding: 12px;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 6px;
+    border-left: 4px solid #dc3545;
+    display: none;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.success-message {
+    color: #28a745;
+    font-size: 14px;
+    margin: 20px 0;
+    padding: 12px;
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 6px;
+    border-left: 4px solid #28a745;
+    display: none;
+    animation: slideInFromRight 0.5s ease;
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===================== FORM ACTIONS ===================== */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e0e0e0;
+    animation: fadeInUp 0.8s ease 0.8s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.form-actions .btn {
+    padding: 12px 30px;
+    font-size: 15px;
+}
+
+/* ===================== RESPONSIVE DESIGN ===================== */
+@media (max-width: 768px) {
+    .edit-profile-container {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+
+    .page-header h1 {
+        font-size: 26px;
+    }
+
+    .photo-upload-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-profile-page {
+        padding: 20px 10px;
+    }
+
+    .edit-profile-container {
+        padding: 25px 15px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+
+    .form-section h2 {
+        font-size: 18px;
+    }
+}
