@@ -126,105 +126,166 @@
         </div>
     </footer>
 
-    <script src="js/config.js"></script>
-    <script>
-        // Protect this page - require authentication
-        if (!requireAuth()) {
-            // redirected to login
-        }
+<script src="js/config.js"></script>
+<script>
+    // Global flag to prevent redirect loops
+    let isLoadingProfile = false;
 
-        // Load user profile
-        async function loadProfile() {
-            try {
-                const data = await apiCall(API_CONFIG.ENDPOINTS.PROFILE);
+    // Protect this page - require authentication
+    if (!isAuthenticated()) {
+        console.log('Not authenticated, redirecting to login...');
+        window.location.href = 'login.html';
+    } else {
+        console.log('User is authenticated, loading profile...');
+    }
+
+    // Load user profile
+    async function loadProfile() {
+        if (isLoadingProfile) {
+            console.log('Already loading profile, skipping...');
+            return;
+        }
+        
+        isLoadingProfile = true;
+        
+        try {
+            console.log('Fetching profile from API...');
+            const data = await apiCall(API_CONFIG.ENDPOINTS.PROFILE);
+            console.log('Profile data received:', data);
+            
+            if (data.success && data.user) {
+                const user = data.user;
                 
-                if (data.success) {
-                    const user = data.user;
-                    
-                    // Store user data
-                    localStorage.setItem('userData', JSON.stringify(user));
-                    
-                    // Update profile UI
-                    document.getElementById('userName').textContent = user.fullName;
-                    document.getElementById('userRole').textContent = user.role;
-                    document.getElementById('userEmail').textContent = user.email;
-                    document.getElementById('username').textContent = user.username;
-                    document.getElementById('userPhone').textContent = user.phone || 'Not provided';
-                    
-                    // Show section if applicable
-                    if (user.section) {
-                        document.getElementById('sectionGroup').style.display = 'block';
-                        document.getElementById('userSection').textContent = user.section;
-                    }
-                    
-                    // Show grade if applicable
-                    if (user.grade) {
-                        document.getElementById('gradeGroup').style.display = 'block';
-                        document.getElementById('userGrade').textContent = user.grade;
-                    }
-                    
-                    // Show profile picture if available
-                    if (user.profilePicture) {
-                        document.getElementById('profilePicture').src = user.profilePicture;
-                    }
-                    
-                    // Show/hide sections based on role
-                    handleRoleBasedAccess(user.role);
+                // Store user data
+                localStorage.setItem('userData', JSON.stringify(user));
+                console.log('User data stored in localStorage');
+                
+                // Update profile UI
+                document.getElementById('userName').textContent = user.fullName || 'User';
+                document.getElementById('userRole').textContent = user.role || 'N/A';
+                document.getElementById('userEmail').textContent = user.email || 'N/A';
+                document.getElementById('username').textContent = user.username || 'N/A';
+                document.getElementById('userPhone').textContent = user.phone || 'Not provided';
+                
+                // Show section if applicable
+                if (user.section) {
+                    document.getElementById('sectionGroup').style.display = 'block';
+                    document.getElementById('userSection').textContent = user.section;
                 }
-            } catch (error) {
-                console.error('Error loading profile:', error);
-                alert('Failed to load profile. Please try again.');
-            }
-        }
-
-        // Handle role-based access
-        function handleRoleBasedAccess(role) {
-            const entryFormsSection = document.getElementById('entryFormsSection');
-            const workerMessage = document.getElementById('workerMessage');
-            const managementSection = document.getElementById('managementSection');
-            const dashboardLink = document.getElementById('dashboardLink');
-            
-            // Workers can only access Resources form
-            if (role === 'Worker') {
-                entryFormsSection.style.display = 'block';
-                // Hide waste and space forms for workers
-                document.querySelector('.form-card:nth-child(1)').style.display = 'none'; // Daily Waste
-                document.querySelector('.form-card:nth-child(3)').style.display = 'none'; // Unused Space
-                // Show info message
-                workerMessage.style.display = 'block';
-                document.querySelector('#workerMessage p').textContent = 'ℹ️ As a Worker, you can submit Weekly Resources reports to track furniture and equipment condition.';
-            }
-            // Principals and Management Staff see dashboard instead of entry forms
-            else if (role === 'Principal' || role === 'Management Staff') {
-                entryFormsSection.style.display = 'none';
-                managementSection.style.display = 'block';
-                dashboardLink.style.display = 'block';
-            }
-            // All other roles (Class Teacher, Section Head, Non-Academic Staff) can access all entry forms
-            else {
-                entryFormsSection.style.display = 'block';
-            }
-        }
-
-        // Load profile on page load
-        document.addEventListener('DOMContentLoaded', loadProfile);
-
-        // Navbar scroll behavior
-        const navbar = document.querySelector('.navbar');
-        let lastScrollTop = 0;
-
-        window.addEventListener('scroll', function() {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                navbar.classList.add('hidden');
+                
+                // Show grade if applicable
+                if (user.grade) {
+                    document.getElementById('gradeGroup').style.display = 'block';
+                    document.getElementById('userGrade').textContent = user.grade;
+                }
+                
+                // Show profile picture if available
+                if (user.profilePicture) {
+                    document.getElementById('profilePicture').src = user.profilePicture;
+                }
+                
+                // Show/hide sections based on role
+                handleRoleBasedAccess(user.role);
+                
+                console.log('Profile loaded successfully');
             } else {
-                navbar.classList.remove('hidden');
+                console.error('Invalid response format:', data);
+                throw new Error('Invalid response from server');
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            
+            // Check if it's an auth error
+            if (error.message && error.message.includes('Session expired')) {
+                console.log('Session expired, redirecting to login...');
+                // Let the apiCall function handle the redirect
+                return;
             }
             
-            lastScrollTop = scrollTop;
-        });
-    </script>
+            // For other errors, show message but don't redirect
+            alert('Failed to load profile. The page will reload.');
+            // Try to reload once
+            if (!sessionStorage.getItem('profileReloadAttempted')) {
+                sessionStorage.setItem('profileReloadAttempted', 'true');
+                window.location.reload();
+            } else {
+                sessionStorage.removeItem('profileReloadAttempted');
+                // If reload didn't help, there might be a bigger issue
+                console.error('Profile load failed after reload attempt');
+            }
+        } finally {
+            isLoadingProfile = false;
+        }
+    }
+
+    // Handle role-based access
+    function handleRoleBasedAccess(role) {
+        console.log('Setting up role-based access for:', role);
+        
+        const entryFormsSection = document.getElementById('entryFormsSection');
+        const workerMessage = document.getElementById('workerMessage');
+        const managementSection = document.getElementById('managementSection');
+        const dashboardLink = document.getElementById('dashboardLink');
+        
+        // Workers can only access Resources form
+        if (role === 'Worker') {
+            console.log('User is Worker - showing limited access');
+            entryFormsSection.style.display = 'block';
+            
+            // Hide waste and space forms for workers
+            const formCards = document.querySelectorAll('.form-card');
+            if (formCards.length >= 3) {
+                formCards[0].style.display = 'none'; // Daily Waste
+                formCards[2].style.display = 'none'; // Unused Space
+            }
+            
+            // Show info message
+            if (workerMessage) {
+                workerMessage.style.display = 'block';
+                const messageP = workerMessage.querySelector('p');
+                if (messageP) {
+                    messageP.textContent = 'ℹ️ As a Worker, you can submit Weekly Resources reports to track furniture and equipment condition.';
+                }
+            }
+        }
+        // Principals and Management Staff see dashboard instead of entry forms
+        else if (role === 'Principal' || role === 'Management Staff') {
+            console.log('User is Management - showing dashboard');
+            if (entryFormsSection) entryFormsSection.style.display = 'none';
+            if (managementSection) managementSection.style.display = 'block';
+            if (dashboardLink) dashboardLink.style.display = 'block';
+        }
+        // All other roles can access all entry forms
+        else {
+            console.log('User is regular staff - showing all forms');
+            if (entryFormsSection) entryFormsSection.style.display = 'block';
+        }
+    }
+
+    // Load profile when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    } else {
+        // DOM is already loaded
+        loadProfile();
+    }
+
+    // Navbar scroll behavior
+    const navbar = document.querySelector('.navbar');
+    let lastScrollTop = 0;
+
+    window.addEventListener('scroll', function() {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            navbar.classList.add('hidden');
+        } else {
+            navbar.classList.remove('hidden');
+        }
+        
+        lastScrollTop = scrollTop;
+    });
+</script>
 
     <style>
         .entry-forms-section {
