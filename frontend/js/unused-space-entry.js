@@ -23,11 +23,15 @@ function initializeForm() {
 // Load user information (from session/localStorage)
 function loadUserInfo() {
     // In a real application, this would fetch from session or API
-    const userData = {
-        name: localStorage.getItem('userName') || 'John Doe',
-        role: localStorage.getItem('userRole') || 'Section Head',
-        section: localStorage.getItem('userSection') || 'Science Department'
-    };
+let user = JSON.parse(localStorage.getItem('userData') || '{}');
+if (!user.fullName) {
+    user = JSON.parse(localStorage.getItem('user') || '{}');
+}
+if (!user.fullName) {
+    alert('Please login first');
+    window.location.href = 'login.html';
+    return;
+}
 
     document.getElementById('userName').textContent = userData.name;
     document.getElementById('userRole').textContent = userData.role;
