@@ -4,7 +4,7 @@
  */
 
 // Configuration
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://school-management-system-wico.onrender.com';
 
 // DOM Elements
 let currentPasswordInput;
@@ -22,7 +22,7 @@ const passwordRules = {
     uppercase: { test: (pwd) => /[A-Z]/.test(pwd), element: null },
     lowercase: { test: (pwd) => /[a-z]/.test(pwd), element: null },
     number: { test: (pwd) => /[0-9]/.test(pwd), element: null },
-    special: { test: (pwd) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd), element: null }
+    special: { test: (pwd) => /[!@#$%^&*()_+...]/.test(pwd), element: null }
 };
 
 // Initialize when DOM is ready
