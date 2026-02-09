@@ -275,6 +275,7 @@
 
         // Form submission with API config
 // Signup form submission
+// Form submission with API config
 signupForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -282,74 +283,156 @@ signupForm.addEventListener('submit', async function(e) {
     errorMessage.style.display = 'none';
     successMessage.style.display = 'none';
     
-    // Get form values
-    const fullname = document.getElementById('fullname').value;
-    const email = document.getElementById('email').value;
-    const username = document.getElementById('username').value;
+    // Get basic form values
+    const fullname = document.getElementById('fullname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
-    const phone = document.getElementById('phone').value;
+    const termsAccepted = document.getElementById('terms').checked;
+    const mainRole = document.getElementById('mainRole').value;
     
-    // Validate passwords match
+    // Validation - Basic fields
+    if (!fullname || !email || !username || !password || !confirmPassword) {
+        errorMessage.textContent = 'Please fill in all required fields';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // Validation - Main role
+    if (!mainRole) {
+        errorMessage.textContent = 'Please select your main role';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // Validation - Email format
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        errorMessage.textContent = 'Please enter a valid email address';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // Validation - Password length
+    if (password.length < 8) {
+        errorMessage.textContent = 'Password must be at least 8 characters long';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // Validation - Passwords match
     if (password !== confirmPassword) {
         errorMessage.textContent = 'Passwords do not match!';
         errorMessage.style.display = 'block';
         return;
     }
     
-    // Get role information
-    const mainRole = document.getElementById('mainRole').value;
-    let role = '';
+    // Validation - Terms accepted
+    if (!termsAccepted) {
+        errorMessage.textContent = 'Please accept the terms and conditions';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // Map complex role system to backend's simple role field
+    let backendRole = '';
     let section = '';
     let grade = '';
     
-    // Map the complex role system to backend's simple role field
     if (mainRole === 'principles') {
         const principlesRole = document.getElementById('principlesRole').value;
+        if (!principlesRole) {
+            errorMessage.textContent = 'Please select your position';
+            errorMessage.style.display = 'block';
+            return;
+        }
+        
         if (principlesRole === 'principle') {
-            role = 'Principal';
-        } else {
-            role = 'Management Staff';
+            backendRole = 'Principal';
+        } else if (principlesRole === 'deputy-principle') {
+            backendRole = 'Management Staff';
+        } else if (principlesRole === 'assistance-principle') {
+            backendRole = 'Management Staff';
         }
-    } else if (mainRole === 'sectional-heads') {
-        role = 'Section Head';
-        grade = document.getElementById('sectionalGrade').value;
-        section = document.getElementById('sectionalSection').value;
-    } else if (mainRole === 'teachers') {
-        role = 'Class Teacher';
-        grade = document.getElementById('teacherGrade').value;
-        section = document.getElementById('teacherSection').value;
-    } else if (mainRole === 'non-academic') {
+    } 
+    else if (mainRole === 'sectional-heads') {
+        backendRole = 'Section Head';
+        const sectionalGrade = document.getElementById('sectionalGrade').value;
+        if (!sectionalGrade) {
+            errorMessage.textContent = 'Please enter the grade of your section';
+            errorMessage.style.display = 'block';
+            return;
+        }
+        grade = sectionalGrade;
+    } 
+    else if (mainRole === 'teachers') {
+        const teacherType = document.getElementById('teacherType').value;
+        if (!teacherType) {
+            errorMessage.textContent = 'Please select teacher type';
+            errorMessage.style.display = 'block';
+            return;
+        }
+        
+        backendRole = 'Class Teacher';
+        
+        if (teacherType === 'class-teacher') {
+            const teacherClass = document.getElementById('teacherClass').value;
+            if (!teacherClass) {
+                errorMessage.textContent = 'Please enter your class';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            grade = teacherClass;
+        } else if (teacherType === 'laboratory-assistance') {
+            const labGrade = document.getElementById('labGrade').value;
+            if (!labGrade) {
+                errorMessage.textContent = 'Please enter laboratory grade';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            grade = labGrade;
+        }
+    } 
+    else if (mainRole === 'non-academic') {
         const nonAcademicRole = document.getElementById('nonAcademicRole').value;
-        if (nonAcademicRole === 'worker') {
-            role = 'Worker';
-        } else {
-            role = 'Non-Academic Staff';
+        if (!nonAcademicRole) {
+            errorMessage.textContent = 'Please select staff type';
+            errorMessage.style.display = 'block';
+            return;
         }
-        section = document.getElementById('nonAcademicSection').value || '';
+        
+        if (nonAcademicRole === 'workers') {
+            backendRole = 'Worker';
+        } else if (nonAcademicRole === 'management-staff') {
+            backendRole = 'Management Staff';
+        } else {
+            backendRole = 'Non-Academic Staff';
+        }
     }
     
-    // Validate role is selected
-    if (!role) {
-        errorMessage.textContent = 'Please select a role';
+    // Validate role is set
+    if (!backendRole) {
+        errorMessage.textContent = 'Please complete all role information';
         errorMessage.style.display = 'block';
         return;
     }
     
     // Prepare data object with correct field names for backend
     const userData = {
-        fullName: fullname,  // Backend expects 'fullName' (camelCase)
+        fullName: fullname,      // Backend expects 'fullName' (camelCase)
         email: email,
         username: username,
         password: password,
-        role: role,          // Simple role string
-        section: section || '',
-        grade: grade || '',
-        phone: phone || ''
+        role: backendRole,       // Simple role string: 'Principal', 'Class Teacher', etc.
+        section: section,        // Optional
+        grade: grade,            // Optional
+        phone: ''                // Optional - no phone field in form
     };
     
     console.log('Sending signup data:', userData); // For debugging
     
+    // Send to API
     try {
         const response = await apiCall(API_CONFIG.ENDPOINTS.SIGNUP, {
             method: 'POST',
@@ -365,16 +448,15 @@ signupForm.addEventListener('submit', async function(e) {
                 window.location.href = 'login.html';
             }, 2000);
         } else {
-            errorMessage.textContent = response.message;
+            errorMessage.textContent = response.message || 'Signup failed. Please try again.';
             errorMessage.style.display = 'block';
         }
     } catch (error) {
         console.error('Signup error:', error);
-        errorMessage.textContent = error.message || 'Network error. Please try again.';
+        errorMessage.textContent = error.message || 'Network error. Please check your connection and try again.';
         errorMessage.style.display = 'block';
     }
 });
-
         // Custom cursor
         document.addEventListener('DOMContentLoaded', () => {
             const cursor = document.createElement('div');
