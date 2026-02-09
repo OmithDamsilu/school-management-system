@@ -140,83 +140,69 @@
     }
 
     // Load user profile
-    async function loadProfile() {
-        if (isLoadingProfile) {
-            console.log('Already loading profile, skipping...');
-            return;
+// Load user profile
+async function loadProfile() {
+    try {
+        console.log('=== PROFILE LOAD START ===');
+        console.log('Token exists:', !!localStorage.getItem('authToken'));
+        console.log('API URL:', API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.PROFILE);
+        
+        const data = await apiCall(API_CONFIG.ENDPOINTS.PROFILE);
+        console.log('API Response:', data);
+        
+        if (data.success && data.user) {
+            const user = data.user;
+            
+            // Store user data
+            localStorage.setItem('userData', JSON.stringify(user));
+            
+            // Update profile UI
+            document.getElementById('userName').textContent = user.fullName || 'User';
+            document.getElementById('userRole').textContent = user.role || 'N/A';
+            document.getElementById('userEmail').textContent = user.email || 'N/A';
+            document.getElementById('username').textContent = user.username || 'N/A';
+            document.getElementById('userPhone').textContent = user.phone || 'Not provided';
+            
+            // Show section if applicable
+            if (user.section) {
+                document.getElementById('sectionGroup').style.display = 'block';
+                document.getElementById('userSection').textContent = user.section;
+            }
+            
+            // Show grade if applicable
+            if (user.grade) {
+                document.getElementById('gradeGroup').style.display = 'block';
+                document.getElementById('userGrade').textContent = user.grade;
+            }
+            
+            // Show profile picture if available
+            if (user.profilePicture) {
+                document.getElementById('profilePicture').src = user.profilePicture;
+            }
+            
+            // Show/hide sections based on role
+            handleRoleBasedAccess(user.role);
+            
+            console.log('=== PROFILE LOADED SUCCESSFULLY ===');
+        } else {
+            console.error('Invalid response:', data);
+            alert('Server returned invalid data: ' + JSON.stringify(data));
         }
+    } catch (error) {
+        console.error('=== PROFILE LOAD ERROR ===');
+        console.error('Error type:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Full error:', error);
         
-        isLoadingProfile = true;
+        // Show detailed error to user
+        alert('Profile load failed!\n\nError: ' + error.message + '\n\nCheck console (F12) for details.\n\nClick OK to go to login page.');
         
-        try {
-            console.log('Fetching profile from API...');
-            const data = await apiCall(API_CONFIG.ENDPOINTS.PROFILE);
-            console.log('Profile data received:', data);
-            
-            if (data.success && data.user) {
-                const user = data.user;
-                
-                // Store user data
-                localStorage.setItem('userData', JSON.stringify(user));
-                console.log('User data stored in localStorage');
-                
-                // Update profile UI
-                document.getElementById('userName').textContent = user.fullName || 'User';
-                document.getElementById('userRole').textContent = user.role || 'N/A';
-                document.getElementById('userEmail').textContent = user.email || 'N/A';
-                document.getElementById('username').textContent = user.username || 'N/A';
-                document.getElementById('userPhone').textContent = user.phone || 'Not provided';
-                
-                // Show section if applicable
-                if (user.section) {
-                    document.getElementById('sectionGroup').style.display = 'block';
-                    document.getElementById('userSection').textContent = user.section;
-                }
-                
-                // Show grade if applicable
-                if (user.grade) {
-                    document.getElementById('gradeGroup').style.display = 'block';
-                    document.getElementById('userGrade').textContent = user.grade;
-                }
-                
-                // Show profile picture if available
-                if (user.profilePicture) {
-                    document.getElementById('profilePicture').src = user.profilePicture;
-                }
-                
-                // Show/hide sections based on role
-                handleRoleBasedAccess(user.role);
-                
-                console.log('Profile loaded successfully');
-            } else {
-                console.error('Invalid response format:', data);
-                throw new Error('Invalid response from server');
-            }
-        } catch (error) {
-            console.error('Error loading profile:', error);
-            
-            // Check if it's an auth error
-            if (error.message && error.message.includes('Session expired')) {
-                console.log('Session expired, redirecting to login...');
-                // Let the apiCall function handle the redirect
-                return;
-            }
-            
-            // For other errors, show message but don't redirect
-            alert('Failed to load profile. The page will reload.');
-            // Try to reload once
-            if (!sessionStorage.getItem('profileReloadAttempted')) {
-                sessionStorage.setItem('profileReloadAttempted', 'true');
-                window.location.reload();
-            } else {
-                sessionStorage.removeItem('profileReloadAttempted');
-                // If reload didn't help, there might be a bigger issue
-                console.error('Profile load failed after reload attempt');
-            }
-        } finally {
-            isLoadingProfile = false;
+        // Only redirect to login if it's an auth error
+        if (error.message && error.message.includes('Session expired')) {
+            window.location.href = 'login.html';
         }
     }
+}
 
     // Handle role-based access
     function handleRoleBasedAccess(role) {
