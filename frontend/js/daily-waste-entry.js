@@ -4,8 +4,8 @@
  */
 
 // Configuration
-const API_URL = 'http://localhost:5000/api';
-const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // Replace with your Cloudinary cloud name
+const API_URL = 'https://school-management-system-wico.onrender.com';
+const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz'; // Replace with your Cloudinary cloud name
 const CLOUDINARY_UPLOAD_PRESET = 'echotrack_daily'; // Replace with your upload preset
 
 // State Management
@@ -25,9 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load user information
 function loadUserInfo() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // Try both possible storage keys for compatibility
+    let user = JSON.parse(localStorage.getItem('userData') || '{}');
     
+    // Fallback to 'user' key if userData doesn't exist
     if (!user.fullName) {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
+    
+    if (!user.fullName) {  // ✅ Fixed: was 'userData.fullName'
         alert('Please login first');
         window.location.href = 'login.html';
         return;
@@ -313,7 +319,10 @@ function validateForm() {
 
 // Collect form data
 function collectFormData() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+const user = JSON.parse(localStorage.getItem('userData') || '{}');
+if (!user._id && !user.id) {
+    user = JSON.parse(localStorage.getItem('user') || '{}');
+}
     
     // Get checked checkboxes
     const getCheckedValues = (name) => {
@@ -390,7 +399,7 @@ async function handleSubmit(e) {
     document.getElementById('submitBtn').disabled = true;
 
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
         const response = await fetch(`${API_URL}/waste/daily`, {
             method: 'POST',
             headers: {
