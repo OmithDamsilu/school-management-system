@@ -139,15 +139,21 @@
                     body: JSON.stringify({ username, password })
                 });
 
-                if (data.success) {
-                    successMessage.textContent = data.message + ' Redirecting to your profile...';
-                    successMessage.style.display = 'block';
-                    
-                    // Redirect to profile page after 1.5 seconds
-                    setTimeout(() => {
-                        window.location.href = 'profile.html';
-                    }, 1500);
-                } else {
+if (data.success) {
+    // 🔑 SAVE TOKEN FIRST
+    localStorage.setItem('authToken', data.token); 
+    // ⬆️ if this doesn't work, see note below
+
+    console.log('Saved authToken:', localStorage.getItem('authToken'));
+
+    successMessage.textContent = data.message + ' Redirecting to your profile...';
+    successMessage.style.display = 'block';
+
+    setTimeout(() => {
+        window.location.href = 'profile.html';
+    }, 1000);
+}
+ else {
                     errorMessage.textContent = data.message;
                     errorMessage.style.display = 'block';
                 }
