@@ -48,9 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load user information
 function loadUserInfo() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // Try both possible storage keys for compatibility
+    let user = JSON.parse(localStorage.getItem('userData') || '{}');
     
+    // Fallback to 'user' key if userData doesn't exist
     if (!user.fullName) {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
+    
+    if (!user.fullName) {  // ✅ Fixed: was 'userData.fullName'
         alert('Please login first');
         window.location.href = 'login.html';
         return;
@@ -58,7 +64,7 @@ function loadUserInfo() {
 
     document.getElementById('userName').textContent = user.fullName;
     document.getElementById('userRole').textContent = getRoleDisplay(user.role);
-    document.getElementById('staffName').value = user.fullName;
+    document.getElementById('teacherName').value = user.fullName;
 }
 
 // Get role display name
