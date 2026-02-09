@@ -16,7 +16,7 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:8000',
     'https://school-management.pages.dev',
-    'https://school-management-system-431.pages.dev/', // Replace with your actual Cloudflare URL
+    'https://school-management-system-431.pages.dev', // Replace with your actual Cloudflare URL
     process.env.FRONTEND_URL // This will come from environment variable
 ];
 
