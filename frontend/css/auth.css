@@ -1,0 +1,346 @@
+/* =====================================================
+   AUTH.CSS - Styles for Entry Forms
+   Used by: daily-waste-entry, weekly-resources-entry, 
+   unused-space-entry forms
+   ===================================================== */
+
+/* Form Container Styles */
+.entry-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Loading States */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 20px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #21a300;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Button Styles */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #21a300 0%, #114814 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(33, 163, 0, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #666 0%, #444 100%);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.btn-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(220, 53, 69, 0.3);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.alert.show {
+    display: block;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+/* Progress Indicators */
+.progress-bar-container {
+    width: 100%;
+    height: 30px;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #21a300 0%, #148200 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    transition: width 0.3s ease;
+}
+
+/* Photo Upload Styles */
+.photo-upload-section {
+    border: 3px dashed #21a300;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(33, 163, 0, 0.05), rgba(17, 72, 20, 0.05));
+    margin: 20px 0;
+}
+
+.photo-upload-section:hover {
+    border-color: #114814;
+    background: linear-gradient(135deg, rgba(33, 163, 0, 0.15), rgba(17, 72, 20, 0.15));
+    transform: translateY(-2px);
+}
+
+.upload-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+}
+
+.photo-count {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #21a300 0%, #114814 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.photo-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.photo-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.photo-item:hover {
+    transform: scale(1.05);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.remove-photo {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.remove-photo:hover {
+    background: #dc3545;
+    transform: scale(1.1);
+}
+
+.upload-progress {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(33, 163, 0, 0.1);
+    border-radius: 12px;
+}
+
+.upload-progress.active {
+    display: block;
+}
+
+/* Add Item Buttons */
+.add-item-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(33, 163, 0, 0.1), rgba(17, 72, 20, 0.1));
+    border: 2px dashed #21a300;
+    border-radius: 12px;
+    color: #114814;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.add-item-btn:hover {
+    background: linear-gradient(135deg, rgba(33, 163, 0, 0.2), rgba(17, 72, 20, 0.2));
+    border-color: #114814;
+    transform: translateY(-2px);
+}
+
+/* Dynamic Item Containers */
+.item-card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.item-card:hover {
+    border-color: #21a300;
+    box-shadow: 0 5px 15px rgba(33, 163, 0, 0.15);
+}
+
+.remove-item-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.remove-item-btn:hover {
+    background: #c82333;
+    transform: rotate(90deg);
+}
+
+/* Photo Requirements Box */
+.photo-requirements {
+    background: linear-gradient(135deg, rgba(33, 163, 0, 0.1), rgba(17, 72, 20, 0.05));
+    border-left: 4px solid #21a300;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.photo-requirements strong {
+    color: #114814;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.photo-requirements ul {
+    color: #333;
+    line-height: 1.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .entry-container {
+        padding: 10px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .photo-preview {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+}
