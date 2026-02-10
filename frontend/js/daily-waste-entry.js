@@ -6,7 +6,7 @@
 // Configuration
 const API_URL = 'https://school-management-system-wico.onrender.com';
 const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz'; // Replace with your Cloudinary cloud name
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack_daily'; // Replace with your upload preset
+const CLOUDINARY_UPLOAD_PRESET = 'echotrack daily'; // Replace with your upload preset
 
 // State Management
 let uploadedPhotos = [];
