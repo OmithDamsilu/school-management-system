@@ -1,10 +1,26 @@
-// Unused Space Entry JavaScript
+/**
+ * Unused Space Entry - JavaScript with Cloudinary Integration
+ * FIXED: Proper API integration, consistent user handling, and photo upload
+ */
+
+// Configuration
+const API_URL = 'https://school-management-system-wico.onrender.com';
+const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz';
+const CLOUDINARY_UPLOAD_PRESET = 'echotrack_unused_space';
+
+// Photo Upload State
+let uploadedPhotos = [];
+const MAX_PHOTOS = 10;
+const MIN_PHOTOS = 3;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     loadUserInfo();
     setupPhotoUpload();
     setupFormHandlers();
+    loadDraft();
 });
 
 // Initialize form with current date and user info
@@ -20,10 +36,12 @@ function initializeForm() {
     dateElement.textContent = formattedDate;
 }
 
+// FIXED: Consistent user data loading
 function loadUserInfo() {
     // Try both possible storage keys for compatibility
     let user = JSON.parse(localStorage.getItem('userData') || '{}');
     
+    // Fallback to 'user' key if userData doesn't exist
     if (!user.fullName) {
         user = JSON.parse(localStorage.getItem('user') || '{}');
     }
@@ -34,7 +52,6 @@ function loadUserInfo() {
         return;
     }
 
-    // Fixed: Use 'user' instead of 'userData'
     document.getElementById('userName').textContent = user.fullName;
     document.getElementById('userRole').textContent = getRoleDisplay(user.role);
     document.getElementById('userSection').textContent = user.section || 'N/A';
@@ -52,16 +69,10 @@ function getRoleDisplay(role) {
     return roleMap[role] || role;
 }
 
-// Photo Upload Functionality
-let uploadedPhotos = [];
-const MAX_PHOTOS = 10;
-const MIN_PHOTOS = 3;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
+// FIXED: Photo Upload with Cloudinary Integration
 function setupPhotoUpload() {
     const photoUploadArea = document.getElementById('photoUploadArea');
     const photoInput = document.getElementById('photoInput');
-    const photoPreview = document.getElementById('photoPreview');
 
     // Click to upload
     photoUploadArea.addEventListener('click', () => {
@@ -122,20 +133,65 @@ function handleFiles(files) {
         return;
     }
 
-    validFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const photoData = {
-                file: file,
-                dataUrl: e.target.result,
-                id: Date.now() + Math.random()
-            };
-            uploadedPhotos.push(photoData);
-            displayPhoto(photoData);
-            updatePhotoCount();
+    // Upload each file to Cloudinary
+    validFiles.forEach(file => uploadToCloudinary(file));
+}
+
+// FIXED: Upload to Cloudinary instead of base64
+async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'echotrack/unused-spaces');
+
+    // Show progress
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    progressContainer.classList.add('active');
+
+    try {
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+
+        const data = await response.json();
+
+        // Add to uploaded photos
+        const photoData = {
+            url: data.secure_url,
+            publicId: data.public_id,
+            originalName: file.name,
+            uploadedAt: new Date().toISOString()
         };
-        reader.readAsDataURL(file);
-    });
+
+        uploadedPhotos.push(photoData);
+        displayPhoto(photoData);
+        updatePhotoCount();
+
+        // Update progress
+        const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
+        progressBar.style.width = progress + '%';
+        progressBar.textContent = progress + '%';
+
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert(`Failed to upload ${file.name}. Please try again.`);
+    } finally {
+        // Hide progress after a delay
+        setTimeout(() => {
+            if (uploadedPhotos.length === 0) {
+                progressContainer.classList.remove('active');
+            }
+        }, 1000);
+    }
 }
 
 function displayPhoto(photoData) {
@@ -143,17 +199,17 @@ function displayPhoto(photoData) {
     
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
-    previewItem.dataset.photoId = photoData.id;
+    previewItem.dataset.photoId = photoData.publicId;
 
     const img = document.createElement('img');
-    img.src = photoData.dataUrl;
-    img.alt = photoData.file.name;
+    img.src = photoData.url;
+    img.alt = photoData.originalName;
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-photo';
     removeBtn.innerHTML = '×';
     removeBtn.type = 'button';
-    removeBtn.onclick = () => removePhoto(photoData.id);
+    removeBtn.onclick = () => removePhoto(photoData.publicId);
 
     previewItem.appendChild(img);
     previewItem.appendChild(removeBtn);
@@ -161,7 +217,7 @@ function displayPhoto(photoData) {
 }
 
 function removePhoto(photoId) {
-    uploadedPhotos = uploadedPhotos.filter(photo => photo.id !== photoId);
+    uploadedPhotos = uploadedPhotos.filter(photo => photo.publicId !== photoId);
     
     const previewItem = document.querySelector(`[data-photo-id="${photoId}"]`);
     if (previewItem) {
@@ -171,14 +227,18 @@ function removePhoto(photoId) {
     updatePhotoCount();
 }
 
+// FIXED: Use CSS classes instead of inline styles
 function updatePhotoCount() {
     const photoCount = document.getElementById('photoCount');
     photoCount.textContent = `${uploadedPhotos.length} / ${MAX_PHOTOS} photos`;
     
-    if (uploadedPhotos.length >= MIN_PHOTOS) {
-        photoCount.style.background = '#21a300';
-    } else {
-        photoCount.style.background = '#dc3545';
+    photoCount.classList.remove('warning', 'error', 'success');
+    if (uploadedPhotos.length < MIN_PHOTOS) {
+        photoCount.classList.add('error');
+    } else if (uploadedPhotos.length >= MIN_PHOTOS && uploadedPhotos.length < MAX_PHOTOS) {
+        photoCount.classList.add('success');
+    } else if (uploadedPhotos.length === MAX_PHOTOS) {
+        photoCount.classList.add('warning');
     }
 }
 
@@ -207,15 +267,19 @@ function setupFormHandlers() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.clear();
-                window.location.href = 'index.html';
+            if (confirm('Are you sure you want to logout? Unsaved changes will be lost.')) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('userData');
+                localStorage.removeItem('token');
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
             }
         });
     }
 }
 
-function handleSubmit(e) {
+// FIXED: Proper form submission with API integration
+async function handleSubmit(e) {
     e.preventDefault();
 
     // Validate photos
@@ -233,21 +297,67 @@ function handleSubmit(e) {
         return;
     }
 
+    if (!confirm('Submit this unused space report?')) {
+        return;
+    }
+
     // Show loading overlay
     showLoadingOverlay();
 
-    // Simulate photo upload progress
-    simulateUpload(() => {
-        // In a real application, this would send data to the server
-        submitFormData(formData);
-    });
+    try {
+        // FIXED: Actual API submission
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/spaces/unused`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('✅ Unused Space Report Submitted Successfully!\n\nThank you for helping us identify this unused space. Your report will be reviewed by the management team.');
+            
+            // Clear drafts
+            localStorage.removeItem('unusedSpaceDraft');
+            localStorage.removeItem('unusedSpaceDraftDate');
+            localStorage.removeItem('unusedSpaceAutoSave');
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        } else {
+            throw new Error(data.message || 'Submission failed');
+        }
+
+    } catch (error) {
+        console.error('Submission error:', error);
+        alert('❌ Failed to submit report: ' + error.message);
+    } finally {
+        hideLoadingOverlay();
+    }
 }
 
+// FIXED: Proper user data collection
 function collectFormData() {
     const form = document.getElementById('unusedSpaceForm');
     const formData = new FormData(form);
     
+    // Get user data with proper fallback
+    let user = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (!user._id && !user.id) {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
+    
     const data = {
+        // User info
+        userId: user._id || user.id,
+        submittedBy: document.getElementById('userName').textContent,
+        submittedRole: document.getElementById('userRole').textContent,
+        submittedSection: document.getElementById('userSection').textContent,
+        
         // Location Information
         buildingName: formData.get('buildingName'),
         floorNumber: formData.get('floorNumber'),
@@ -297,10 +407,8 @@ function collectFormData() {
         photos: uploadedPhotos,
 
         // Metadata
-        submittedBy: document.getElementById('userName').textContent,
-        submittedRole: document.getElementById('userRole').textContent,
-        submittedSection: document.getElementById('userSection').textContent,
-        submittedDate: new Date().toISOString()
+        submittedDate: new Date().toISOString(),
+        status: 'submitted'
     };
 
     return data;
@@ -336,48 +444,9 @@ function validateForm(formData) {
     return true;
 }
 
-function simulateUpload(callback) {
-    const uploadProgress = document.getElementById('uploadProgress');
-    const progressBar = document.getElementById('progressBar');
-    
-    uploadProgress.classList.add('active');
-    
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 100) progress = 100;
-        
-        progressBar.style.width = progress + '%';
-        progressBar.textContent = Math.round(progress) + '%';
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-                uploadProgress.classList.remove('active');
-                callback();
-            }, 500);
-        }
-    }, 200);
-}
-
-function submitFormData(formData) {
-    // In a real application, this would send to server via API
-    console.log('Submitting Space Report:', formData);
-
-    // Simulate API call
-    setTimeout(() => {
-        hideLoadingOverlay();
-        
-        // Show success message
-        alert('✅ Space Report Submitted Successfully!\n\nThank you for helping us identify this unused space. Your report will be reviewed by the management team.');
-        
-        // Redirect to dashboard
-        window.location.href = 'dashboard.html';
-    }, 1500);
-}
-
 function saveDraft() {
     const formData = collectFormData();
+    formData.status = 'draft';
     
     // Save to localStorage
     localStorage.setItem('unusedSpaceDraft', JSON.stringify(formData));
@@ -443,11 +512,6 @@ function showLoadingOverlay() {
 function hideLoadingOverlay() {
     document.getElementById('loadingOverlay').classList.remove('active');
 }
-
-// Check for draft on load
-window.addEventListener('load', () => {
-    loadDraft();
-});
 
 // Auto-save every 2 minutes
 setInterval(() => {
