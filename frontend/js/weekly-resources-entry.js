@@ -6,7 +6,7 @@
 // Configuration
 const API_URL = 'https://school-management-system-wico.onrender.com';
 const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz';
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack_weekly'; // Note: using underscore instead of space
+const CLOUDINARY_UPLOAD_PRESET = 'echotrack_weekly'; // Using underscore for API compatibility
 
 // State Management
 let uploadedPhotos = [];
@@ -56,7 +56,7 @@ function loadUserInfo() {
         user = JSON.parse(localStorage.getItem('user') || '{}');
     }
     
-    if (!user.fullName) {  // ✅ Fixed: was 'userData.fullName'
+    if (!user.fullName) {
         alert('Please login first');
         window.location.href = 'login.html';
         return;
@@ -418,12 +418,14 @@ function updatePhotoCount() {
     const count = uploadedPhotos.length;
     badge.textContent = `${count} / ${MAX_PHOTOS} photos`;
     
-    if (count >= MIN_PHOTOS && count <= MAX_PHOTOS) {
-        badge.style.background = '#21a300';
-    } else if (count < MIN_PHOTOS) {
-        badge.style.background = '#ff9800';
-    } else {
-        badge.style.background = '#d32f2f';
+    // Use CSS classes instead of inline styles
+    badge.classList.remove('warning', 'error', 'success');
+    if (count < MIN_PHOTOS) {
+        badge.classList.add('error');
+    } else if (count >= MIN_PHOTOS && count < MAX_PHOTOS) {
+        badge.classList.add('success');
+    } else if (count === MAX_PHOTOS) {
+        badge.classList.add('warning');
     }
 }
 
@@ -490,12 +492,16 @@ function collectEquipmentData() {
 
 // Collect form data
 function collectFormData() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // Get user data with proper fallback
+    let user = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (!user._id && !user.id) {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
     
     const formData = {
-        // User info
+        // User info - FIXED: Use correct field name
         userId: user._id || user.id,
-        staffName: document.getElementById('staffName').value,
+        teacherName: document.getElementById('teacherName').value,
         userRole: user.role,
         
         // Location
@@ -551,7 +557,8 @@ async function handleSubmit(e) {
     document.getElementById('submitBtn').disabled = true;
 
     try {
-        const token = localStorage.getItem('token');
+        // FIXED: Support both token keys
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
         const response = await fetch(`${API_URL}/resources/weekly`, {
             method: 'POST',
             headers: {
@@ -572,6 +579,7 @@ async function handleSubmit(e) {
             // Redirect to dashboard
             window.location.href = 'dashboard.html';
         } else {
+            // FIXED: Show server error message
             throw new Error(data.message || 'Submission failed');
         }
 
@@ -630,8 +638,44 @@ function loadDraftIfExists() {
             updatePhotoCount();
         }
 
-        // TODO: Load furniture and equipment items (more complex)
-        // This would require recreating the dynamic items
+        // FIXED: Load furniture and equipment items
+        if (data.furnitureItemIds && data.furniture) {
+            // Clear existing items first
+            furnitureItems = [];
+            document.getElementById('furnitureContainer').innerHTML = '';
+            
+            // Recreate items with saved data
+            data.furnitureItemIds.forEach((itemId, index) => {
+                addFurnitureItem();
+                const furnitureData = data.furniture[index];
+                if (furnitureData) {
+                    document.querySelector(`[name="furniture_type_${itemId}"]`).value = furnitureData.type || '';
+                    document.querySelector(`[name="furniture_name_${itemId}"]`).value = furnitureData.name || '';
+                    document.querySelector(`[name="furniture_quantity_${itemId}"]`).value = furnitureData.quantity || 1;
+                    document.querySelector(`[name="furniture_condition_${itemId}"]`).value = furnitureData.condition || '';
+                    document.querySelector(`[name="furniture_notes_${itemId}"]`).value = furnitureData.notes || '';
+                }
+            });
+        }
+
+        if (data.equipmentItemIds && data.equipment) {
+            // Clear existing items first
+            equipmentItems = [];
+            document.getElementById('equipmentContainer').innerHTML = '';
+            
+            // Recreate items with saved data
+            data.equipmentItemIds.forEach((itemId, index) => {
+                addEquipmentItem();
+                const equipmentData = data.equipment[index];
+                if (equipmentData) {
+                    document.querySelector(`[name="equipment_type_${itemId}"]`).value = equipmentData.type || '';
+                    document.querySelector(`[name="equipment_name_${itemId}"]`).value = equipmentData.name || '';
+                    document.querySelector(`[name="equipment_quantity_${itemId}"]`).value = equipmentData.quantity || 1;
+                    document.querySelector(`[name="equipment_condition_${itemId}"]`).value = equipmentData.condition || '';
+                    document.querySelector(`[name="equipment_notes_${itemId}"]`).value = equipmentData.notes || '';
+                }
+            });
+        }
     }
 }
 
@@ -641,6 +685,18 @@ function handleCancel() {
         window.location.href = 'dashboard.html';
     }
 }
+
+// Logout handler
+document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (confirm('Are you sure you want to logout? Unsaved changes will be lost.')) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
+        window.location.href = 'login.html';
+    }
+});
 
 // Make remove functions globally accessible
 window.removeFurnitureItem = removeFurnitureItem;
