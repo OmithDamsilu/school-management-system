@@ -6,7 +6,7 @@
 // Configuration
 const API_URL = 'http://localhost:5000/api';
 const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // Replace with your Cloudinary cloud name
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack_weekly'; // Replace with your upload preset
+const CLOUDINARY_UPLOAD_PRESET = 'echotrack weekly'; // Replace with your upload preset
 
 // State Management
 let uploadedPhotos = [];
