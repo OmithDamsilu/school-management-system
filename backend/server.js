@@ -371,11 +371,12 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
             { new: true }
         ).select('-password');
 
-        res.json({ 
-            success: true, 
-            message: 'Profile updated successfully',
-            user: updatedUser 
-        });
+res.json({ 
+    success: true, 
+    message: 'Profile picture updated successfully',
+    imageUrl: updatedUser.profilePicture,  // ✅ Correct property name
+    profilePicture: updatedUser.profilePicture  // Keep for backward compatibility
+});
     } catch (error) {
         console.error('Update profile error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
