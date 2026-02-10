@@ -268,7 +268,7 @@ async function handlePasswordChange(e) {
 
     try {
         // Make API call to change password
-        const response = await fetch(`${API_URL}/change-password`, {
+        const response = await fetch(`${API_URL}/api/user/change-password`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
