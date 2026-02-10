@@ -6,7 +6,7 @@
 // Configuration
 const API_URL = 'https://school-management-system-wico.onrender.com';
 const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz';
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack weekly'; // Note: using underscore instead of space
+const CLOUDINARY_UPLOAD_PRESET = 'echotrack_weekly'; // Note: using underscore instead of space
 
 // State Management
 let uploadedPhotos = [];
