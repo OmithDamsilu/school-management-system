@@ -97,9 +97,9 @@ function setupPasswordToggles() {
 
 // Check if user is authenticated
 function checkAuthentication() {
-    const user = JSON.parse(localStorage.getItem('userData') || localStorage.getItem('user') || '{}');
-    
-    if (!user.email) {
+    const token = localStorage.getItem('authToken');
+
+    if (!token) {
         showError('You must be logged in to change your password.');
         setTimeout(() => {
             window.location.href = 'login.html';
@@ -249,10 +249,10 @@ async function handlePasswordChange(e) {
         return;
     }
 
-    // Get user data
-    const user = JSON.parse(localStorage.getItem('userData') || localStorage.getItem('user') || '{}');
-    
-    if (!user.email) {
+    // Get auth token
+    const token = localStorage.getItem('authToken');
+
+    if (!token) {
         showError('User session not found. Please login again.');
         setTimeout(() => {
             window.location.href = 'login.html';
@@ -272,10 +272,10 @@ async function handlePasswordChange(e) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`  // ✅ Required by authenticateToken middleware
             },
             body: JSON.stringify({
-                email: user.email,
-                currentPassword: currentPassword,
+                currentPassword: currentPassword,  // ✅ Only send what the backend reads
                 newPassword: newPassword
             })
         });
