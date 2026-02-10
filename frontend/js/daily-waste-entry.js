@@ -1,12 +1,10 @@
 /**
- * Daily Waste Entry - JavaScript with Cloudinary Integration
- * Handles form submission, photo uploads, and data validation
+ * Daily Waste Entry - JavaScript with Backend File Upload
+ * Handles form submission, photo uploads via backend, and data validation
  */
 
 // Configuration
-const API_URL = 'https://school-management-system-wico.onrender.com';
-const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz'; // Replace with your Cloudinary cloud name
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack_daily'; // Replace with your upload preset
+const API_URL = API_CONFIG?.BASE_URL || 'https://school-management-system-wico.onrender.com';
 
 // State Management
 let uploadedPhotos = [];
@@ -33,7 +31,7 @@ function loadUserInfo() {
         user = JSON.parse(localStorage.getItem('user') || '{}');
     }
     
-    if (!user.fullName) {  // ✅ Fixed: was 'userData.fullName'
+    if (!user.fullName) {
         alert('Please login first');
         window.location.href = 'login.html';
         return;
@@ -123,7 +121,7 @@ function handlePhotoSelection(e) {
     handleFiles(files);
 }
 
-// Handle file processing
+// Handle file processing - FIXED: Store files locally instead of uploading to Cloudinary
 function handleFiles(files) {
     // Filter valid image files
     const imageFiles = files.filter(file => {
@@ -145,75 +143,28 @@ function handleFiles(files) {
         return;
     }
 
-    // Upload each file to Cloudinary
-    imageFiles.forEach(file => uploadToCloudinary(file));
-}
-
-// Upload photo to Cloudinary
-async function uploadToCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'echotrack/daily-waste');
-
-    // Show progress
-    const progressContainer = document.getElementById('uploadProgress');
-    const progressBar = document.getElementById('progressBar');
-    progressContainer.style.display = 'block';
-
-    try {
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error('Upload failed');
-        }
-
-        const data = await response.json();
-
-        // Add to uploaded photos
+    // Store files locally for preview and later upload to backend
+    imageFiles.forEach(file => {
         const photoData = {
-            url: data.secure_url,
-            publicId: data.public_id,
+            file: file,  // Store the actual File object
             originalName: file.name,
-            uploadedAt: new Date().toISOString()
+            preview: URL.createObjectURL(file)  // Create preview URL
         };
-
         uploadedPhotos.push(photoData);
         addPhotoPreview(photoData, uploadedPhotos.length - 1);
-        updatePhotoCount();
-
-        // Update progress
-        const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
-        progressBar.style.width = progress + '%';
-        progressBar.textContent = progress + '%';
-
-    } catch (error) {
-        console.error('Upload error:', error);
-        alert(`Failed to upload ${file.name}. Please try again.`);
-    } finally {
-        // Hide progress after a delay
-        setTimeout(() => {
-            if (uploadedPhotos.length === 0) {
-                progressContainer.style.display = 'none';
-            }
-        }, 1000);
-    }
+    });
+    
+    updatePhotoCount();
 }
 
-// Add photo preview
+// Add photo preview - FIXED: Use local preview URL
 function addPhotoPreview(photoData, index) {
     const preview = document.getElementById('photoPreview');
     
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
     previewItem.innerHTML = `
-        <img src="${photoData.url}" alt="Waste photo ${index + 1}">
+        <img src="${photoData.preview}" alt="Waste photo ${index + 1}">
         <button type="button" class="remove-photo" data-index="${index}">×</button>
         <div class="photo-info">
             ${photoData.originalName}
@@ -228,9 +179,13 @@ function addPhotoPreview(photoData, index) {
     preview.appendChild(previewItem);
 }
 
-// Remove photo
+// Remove photo - FIXED: Revoke object URL to prevent memory leaks
 function removePhoto(index) {
     if (confirm('Remove this photo?')) {
+        // Revoke object URL to prevent memory leaks
+        if (uploadedPhotos[index].preview) {
+            URL.revokeObjectURL(uploadedPhotos[index].preview);
+        }
         uploadedPhotos.splice(index, 1);
         refreshPhotoPreview();
         updatePhotoCount();
@@ -317,12 +272,12 @@ function validateForm() {
     return true;
 }
 
-// Collect form data
+// Collect form data (for draft saving and potential other uses)
 function collectFormData() {
-const user = JSON.parse(localStorage.getItem('userData') || '{}');
-if (!user._id && !user.id) {
-    user = JSON.parse(localStorage.getItem('user') || '{}');
-}
+    const user = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (!user._id && !user.id) {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
     
     // Get checked checkboxes
     const getCheckedValues = (name) => {
@@ -335,7 +290,7 @@ if (!user._id && !user.id) {
         userId: user._id || user.id,
         teacherName: document.getElementById('teacherName').value,
         userRole: user.role,
-        classSection: document.getElementById('classSection').value,
+        classSection: document.getElementById('classSection')?.value || '',
         entryDate: document.getElementById('entryDate').value,
 
         // Waste data
@@ -365,12 +320,12 @@ if (!user._id && !user.id) {
         paperManagement: getCheckedValues('paperManagement'),
         cleanlinessRating: selectedRating,
 
-        // Photos
-        photos: uploadedPhotos,
+        // Photos (note: for backend upload, we use files directly in FormData)
+        photos: uploadedPhotos.map(p => ({ originalName: p.originalName })),
 
         // Notes
-        notes: document.getElementById('notes').value,
-        urgencyLevel: document.getElementById('urgencyLevel').value,
+        notes: document.getElementById('notes')?.value || '',
+        urgencyLevel: document.getElementById('urgencyLevel')?.value || 'none',
 
         // Metadata
         submittedAt: new Date().toISOString(),
@@ -380,7 +335,7 @@ if (!user._id && !user.id) {
     return formData;
 }
 
-// Handle form submission
+// FIXED: Handle form submission with backend upload using FormData
 async function handleSubmit(e) {
     e.preventDefault();
 
@@ -392,30 +347,67 @@ async function handleSubmit(e) {
         return;
     }
 
-    const formData = collectFormData();
-
     // Show loading
     document.getElementById('loadingOverlay').classList.add('active');
     document.getElementById('submitBtn').disabled = true;
 
     try {
+        const user = JSON.parse(localStorage.getItem('userData') || localStorage.getItem('user') || '{}');
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/waste/daily`, {
+        
+        if (!token) {
+            throw new Error('Please login first');
+        }
+
+        // Get checked checkboxes
+        const getCheckedValues = (name) => {
+            return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+                .map(cb => cb.value);
+        };
+
+        // Create FormData with all form fields AND photos
+        const formData = new FormData();
+        
+        // Add form fields
+        formData.append('date', document.getElementById('entryDate').value);
+        formData.append('paperWaste', parseFloat(document.getElementById('recyclableAmount').value) || 0);
+        formData.append('plasticWaste', parseFloat(document.getElementById('organicAmount').value) || 0);
+        formData.append('foodWaste', 0); // Add if you have this field
+        formData.append('generalWaste', parseFloat(document.getElementById('nonRecyclableAmount').value) || 0);
+        formData.append('wasProperlySegregated', 
+            document.querySelector('input[name="separationStatus"]:checked')?.value === 'yes' ? 'true' : 'false');
+        formData.append('classroomCleanliness', selectedRating);
+        formData.append('additionalNotes', document.getElementById('notes')?.value || '');
+
+        // Add all photos to FormData
+        uploadedPhotos.forEach((photoData) => {
+            formData.append('photos', photoData.file);
+        });
+
+        // Send as multipart/form-data to backend
+        const response = await fetch(`${API_URL}/api/waste/daily`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
+                // DON'T set Content-Type - browser will set it with multipart boundary
             },
-            body: JSON.stringify(formData)
+            body: formData
         });
 
         const data = await response.json();
 
-        if (response.ok) {
+        if (response.ok && data.success) {
             alert('✅ Daily waste entry submitted successfully!');
             
             // Clear draft
             localStorage.removeItem('dailyWasteDraft');
+            
+            // Clean up object URLs
+            uploadedPhotos.forEach(photo => {
+                if (photo.preview) {
+                    URL.revokeObjectURL(photo.preview);
+                }
+            });
             
             // Redirect to dashboard
             window.location.href = 'dashboard.html';
@@ -436,6 +428,7 @@ async function handleSubmit(e) {
 function saveDraft() {
     const formData = collectFormData();
     formData.status = 'draft';
+    formData.photoCount = uploadedPhotos.length;
     
     localStorage.setItem('dailyWasteDraft', JSON.stringify(formData));
     alert('💾 Draft saved successfully! You can continue later.');
@@ -449,12 +442,24 @@ function loadDraftIfExists() {
         const data = JSON.parse(draft);
         
         // Load basic fields
-        document.getElementById('classSection').value = data.classSection || '';
-        document.getElementById('recyclableAmount').value = data.wasteData?.recyclable?.amount || 0;
-        document.getElementById('organicAmount').value = data.wasteData?.organic?.amount || 0;
-        document.getElementById('nonRecyclableAmount').value = data.wasteData?.nonRecyclable?.amount || 0;
-        document.getElementById('notes').value = data.notes || '';
-        document.getElementById('urgencyLevel').value = data.urgencyLevel || 'none';
+        if (data.classSection) document.getElementById('classSection').value = data.classSection;
+        if (data.entryDate) document.getElementById('entryDate').value = data.entryDate;
+        
+        // Load waste amounts
+        if (data.wasteData) {
+            if (data.wasteData.recyclable) {
+                document.getElementById('recyclableAmount').value = data.wasteData.recyclable.amount || 0;
+            }
+            if (data.wasteData.organic) {
+                document.getElementById('organicAmount').value = data.wasteData.organic.amount || 0;
+            }
+            if (data.wasteData.nonRecyclable) {
+                document.getElementById('nonRecyclableAmount').value = data.wasteData.nonRecyclable.amount || 0;
+            }
+        }
+        
+        if (data.notes) document.getElementById('notes').value = data.notes;
+        if (data.urgencyLevel) document.getElementById('urgencyLevel').value = data.urgencyLevel;
 
         // Load checkboxes
         if (data.wasteData?.recyclable?.items) {
@@ -489,11 +494,9 @@ function loadDraftIfExists() {
             setRating(data.cleanlinessRating);
         }
 
-        // Load photos
-        if (data.photos && data.photos.length > 0) {
-            uploadedPhotos = data.photos;
-            refreshPhotoPreview();
-            updatePhotoCount();
+        // Note: Photos are not restored from draft (they're File objects, can't be serialized)
+        if (data.photoCount && data.photoCount > 0) {
+            alert(`Note: Your draft had ${data.photoCount} photos. Please re-upload them.`);
         }
     }
 }
@@ -501,6 +504,12 @@ function loadDraftIfExists() {
 // Handle cancel
 function handleCancel() {
     if (confirm('Discard this entry and return to dashboard?')) {
+        // Clean up object URLs
+        uploadedPhotos.forEach(photo => {
+            if (photo.preview) {
+                URL.revokeObjectURL(photo.preview);
+            }
+        });
         window.location.href = 'dashboard.html';
     }
 }
@@ -509,8 +518,16 @@ function handleCancel() {
 document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     if (confirm('Are you sure you want to logout? Unsaved changes will be lost.')) {
+        // Clean up object URLs
+        uploadedPhotos.forEach(photo => {
+            if (photo.preview) {
+                URL.revokeObjectURL(photo.preview);
+            }
+        });
         localStorage.removeItem('user');
+        localStorage.removeItem('userData');
         localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
         window.location.href = 'login.html';
     }
 });
