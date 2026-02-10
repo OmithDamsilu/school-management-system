@@ -402,11 +402,23 @@ app.post('/api/user/profile-picture', authenticateToken, upload.single('profileP
         res.json({ 
             success: true, 
             message: 'Profile picture updated successfully',
-            profilePicture: updatedUser.profilePicture
+            imageUrl: updatedUser.profilePicture,  // ✅ Add this field
+            profilePicture: updatedUser.profilePicture,  // Keep for compatibility
+            user: {
+                id: updatedUser._id,
+                username: updatedUser.username,
+                email: updatedUser.email,
+                fullName: updatedUser.fullName,
+                role: updatedUser.role,
+                profilePicture: updatedUser.profilePicture
+            }
         });
     } catch (error) {
         console.error('Upload profile picture error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error: ' + error.message 
+        });
     }
 });
 
