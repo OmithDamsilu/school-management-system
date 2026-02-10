@@ -5,8 +5,8 @@
 
 // Configuration
 const API_URL = 'https://school-management-system-wico.onrender.com';
-const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz'; // Replace with your Cloudinary cloud name
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack weekly'; // Replace with your upload preset
+const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz';
+const CLOUDINARY_UPLOAD_PRESET = 'echotrack weekly'; // Note: using underscore instead of space
 
 // State Management
 let uploadedPhotos = [];
@@ -641,16 +641,6 @@ function handleCancel() {
         window.location.href = 'dashboard.html';
     }
 }
-
-// Logout
-document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (confirm('Are you sure you want to logout? Unsaved changes will be lost.')) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        window.location.href = 'login.html';
-    }
-});
 
 // Make remove functions globally accessible
 window.removeFurnitureItem = removeFurnitureItem;
