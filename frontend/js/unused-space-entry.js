@@ -20,22 +20,36 @@ function initializeForm() {
     dateElement.textContent = formattedDate;
 }
 
-// Load user information (from session/localStorage)
 function loadUserInfo() {
-    // In a real application, this would fetch from session or API
-let user = JSON.parse(localStorage.getItem('userData') || '{}');
-if (!user.fullName) {
-    user = JSON.parse(localStorage.getItem('user') || '{}');
-}
-if (!user.fullName) {
-    alert('Please login first');
-    window.location.href = 'login.html';
-    return;
+    // Try both possible storage keys for compatibility
+    let user = JSON.parse(localStorage.getItem('userData') || '{}');
+    
+    if (!user.fullName) {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
+    
+    if (!user.fullName) {
+        alert('Please login first');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Fixed: Use 'user' instead of 'userData'
+    document.getElementById('userName').textContent = user.fullName;
+    document.getElementById('userRole').textContent = getRoleDisplay(user.role);
+    document.getElementById('userSection').textContent = user.section || 'N/A';
 }
 
-    document.getElementById('userName').textContent = userData.name;
-    document.getElementById('userRole').textContent = userData.role;
-    document.getElementById('userSection').textContent = userData.section;
+// Add role display helper
+function getRoleDisplay(role) {
+    const roleMap = {
+        'teacher': 'Teacher',
+        'lab_assistant': 'Laboratory Assistant',
+        'section_head': 'Section Head',
+        'non_academic_staff': 'Non-Academic Staff',
+        'admin': 'Administrator'
+    };
+    return roleMap[role] || role;
 }
 
 // Photo Upload Functionality
