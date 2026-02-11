@@ -138,37 +138,32 @@ function handleFiles(files) {
 }
 
 // FIXED: Upload to Cloudinary instead of base64
+// ✅ REPLACE: Upload to Base64 instead of Cloudinary
 async function uploadToCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'echotrack/unused-spaces');
-
-    // Show progress
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
     progressContainer.classList.add('active');
 
     try {
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
+        console.log(`📸 Processing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
+        
+        // Compress image
+        const compressedBlob = await compressImage(file);
+        console.log(`✅ Compressed to ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
+        
+        // Convert to Base64
+        const base64String = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(compressedBlob);
+        });
 
-        if (!response.ok) {
-            throw new Error('Upload failed');
-        }
-
-        const data = await response.json();
-
-        // Add to uploaded photos
         const photoData = {
-            url: data.secure_url,
-            publicId: data.public_id,
+            data: base64String,
             originalName: file.name,
+            mimeType: file.type,
+            size: compressedBlob.size,
             uploadedAt: new Date().toISOString()
         };
 
@@ -176,16 +171,14 @@ async function uploadToCloudinary(file) {
         displayPhoto(photoData);
         updatePhotoCount();
 
-        // Update progress
         const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
         progressBar.style.width = progress + '%';
         progressBar.textContent = progress + '%';
 
     } catch (error) {
         console.error('Upload error:', error);
-        alert(`Failed to upload ${file.name}. Please try again.`);
+        alert(`Failed to process ${file.name}: ${error.message}`);
     } finally {
-        // Hide progress after a delay
         setTimeout(() => {
             if (uploadedPhotos.length === 0) {
                 progressContainer.classList.remove('active');
@@ -194,26 +187,86 @@ async function uploadToCloudinary(file) {
     }
 }
 
+// ✅ ADD: Image compression function
+function compressImage(file, maxWidth = 1200, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Compression failed'));
+                        }
+                    },
+                    file.type || 'image/jpeg',
+                    quality
+                );
+            };
+            img.onerror = () => reject(new Error('Image load failed'));
+            img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('File read failed'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// ✅ UPDATED: Display Base64 photo
 function displayPhoto(photoData) {
     const photoPreview = document.getElementById('photoPreview');
     
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
-    previewItem.dataset.photoId = photoData.publicId;
+    previewItem.dataset.photoIndex = uploadedPhotos.length - 1;
 
     const img = document.createElement('img');
-    img.src = photoData.url;
+    img.src = photoData.data; // ✅ Use Base64 data
     img.alt = photoData.originalName;
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-photo';
     removeBtn.innerHTML = '×';
     removeBtn.type = 'button';
-    removeBtn.onclick = () => removePhoto(photoData.publicId);
+    removeBtn.onclick = () => removePhoto(uploadedPhotos.length - 1);
 
     previewItem.appendChild(img);
     previewItem.appendChild(removeBtn);
     photoPreview.appendChild(previewItem);
+}
+
+// ✅ UPDATED: Remove photo by index
+function removePhoto(index) {
+    if (confirm('Remove this photo?')) {
+        uploadedPhotos.splice(index, 1);
+        refreshPhotoPreview();
+        updatePhotoCount();
+    }
+}
+
+// ✅ ADD: Refresh preview
+function refreshPhotoPreview() {
+    const photoPreview = document.getElementById('photoPreview');
+    photoPreview.innerHTML = '';
+    uploadedPhotos.forEach((photo) => {
+        displayPhoto(photo);
+    });
 }
 
 function removePhoto(photoId) {
