@@ -146,7 +146,51 @@ function handleFiles(files) {
     // Convert each file to Base64 and store in MongoDB
     imageFiles.forEach(file => convertToBase64(file));
 }
-// ✅ UPDATED: Convert photo to Base64 with compression
+
+// ✅ ADD THIS FUNCTION - Image Compression
+function compressImage(file, maxWidth = 1200, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Resize if image is too large
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Convert canvas to blob with compression
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Canvas compression failed'));
+                        }
+                    },
+                    file.type || 'image/jpeg',
+                    quality
+                );
+            };
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// ✅ THEN UPDATE THIS FUNCTION - Convert photo to Base64 with compression
 async function convertToBase64(file) {
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
@@ -193,54 +237,7 @@ async function convertToBase64(file) {
         }, 1000);
     }
 }
-// Convert photo to Base64 - MODIFIED to replace Cloudinary upload
-// ✅ UPDATED: Convert photo to Base64 with compression
-async function convertToBase64(file) {
-    const progressContainer = document.getElementById('uploadProgress');
-    const progressBar = document.getElementById('progressBar');
-    progressContainer.style.display = 'block';
 
-    try {
-        // Compress image first
-        console.log(`📸 Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
-        const compressedBlob = await compressImage(file);
-        console.log(`✅ Compressed to ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
-        
-        // Convert compressed blob to base64
-        const base64String = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(compressedBlob);
-        });
-
-        const photoData = {
-            data: base64String,
-            originalName: file.name,
-            mimeType: file.type,
-            size: compressedBlob.size,
-            uploadedAt: new Date().toISOString()
-        };
-
-        uploadedPhotos.push(photoData);
-        addPhotoPreview(photoData, uploadedPhotos.length - 1);
-        updatePhotoCount();
-
-        const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
-        progressBar.style.width = progress + '%';
-        progressBar.textContent = progress + '%';
-
-    } catch (error) {
-        console.error('Upload error:', error);
-        alert(`Failed to process ${file.name}: ${error.message}`);
-    } finally {
-        setTimeout(() => {
-            if (uploadedPhotos.length === 0) {
-                progressContainer.style.display = 'none';
-            }
-        }, 1000);
-    }
-}
 
 // Add photo preview - MODIFIED to use Base64 data
 function addPhotoPreview(photoData, index) {
