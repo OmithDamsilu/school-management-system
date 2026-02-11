@@ -1,5 +1,5 @@
 /**
- * Weekly Resources Entry - JavaScript with Base64 Photo Storage
+ * Weekly Resources Entry - JavaScript with Base64 Photo Storage - FIXED
  * Handles form submission, photo uploads to MongoDB, and data validation
  */
 
@@ -62,7 +62,8 @@ function loadUserInfo() {
 
     document.getElementById('userName').textContent = user.fullName;
     document.getElementById('userRole').textContent = getRoleDisplay(user.role);
-    document.getElementById('teacherName').value = user.fullName;
+    // ✅ FIXED: Changed from teacherName to staffName
+    document.getElementById('staffName').value = user.fullName;
 }
 
 // Get role display name
@@ -95,27 +96,47 @@ function setWeekEnding() {
 
 // Initialize all event listeners
 function initializeEventListeners() {
-    // Photo upload
+    // Photo upload - ✅ FIXED: Better error handling
     const photoUploadArea = document.getElementById('photoUploadArea');
     const photoInput = document.getElementById('photoInput');
 
-    photoUploadArea.addEventListener('click', () => photoInput.click());
-    photoInput.addEventListener('change', handlePhotoSelection);
+    if (!photoUploadArea || !photoInput) {
+        console.error('Photo upload elements not found!');
+        return;
+    }
+
+    // ✅ FIXED: Prevent default click behavior and trigger file input
+    photoUploadArea.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        photoInput.click();
+    });
+
+    // ✅ FIXED: Added logging to debug
+    photoInput.addEventListener('change', (e) => {
+        console.log('📸 File input changed, files:', e.target.files);
+        handlePhotoSelection(e);
+    });
 
     // Drag and drop
     photoUploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         photoUploadArea.style.borderColor = '#114814';
     });
 
-    photoUploadArea.addEventListener('dragleave', () => {
+    photoUploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         photoUploadArea.style.borderColor = '#21a300';
     });
 
     photoUploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         photoUploadArea.style.borderColor = '#21a300';
         const files = Array.from(e.dataTransfer.files);
+        console.log('📸 Files dropped:', files.length);
         handleFiles(files);
     });
 
@@ -281,16 +302,31 @@ function renumberItems(type) {
     });
 }
 
-// Handle photo selection
+// Handle photo selection - ✅ FIXED: Added better logging
 function handlePhotoSelection(e) {
+    console.log('📸 handlePhotoSelection called');
     const files = Array.from(e.target.files);
+    console.log('📸 Files selected:', files.length);
+    
+    if (files.length === 0) {
+        console.warn('⚠️ No files selected');
+        return;
+    }
+    
     handleFiles(files);
+    
+    // ✅ FIXED: Reset input value so same file can be selected again
+    e.target.value = '';
 }
 
-// Handle file processing
+// Handle file processing - ✅ FIXED: Added better logging
 function handleFiles(files) {
+    console.log('📸 handleFiles called with', files.length, 'files');
+    
     // Filter valid image files
     const imageFiles = files.filter(file => {
+        console.log('📸 Checking file:', file.name, 'Type:', file.type, 'Size:', file.size);
+        
         if (!file.type.startsWith('image/')) {
             alert(`${file.name} is not an image file`);
             return false;
@@ -302,6 +338,8 @@ function handleFiles(files) {
         return true;
     });
 
+    console.log('📸 Valid image files:', imageFiles.length);
+
     // Check total photo limit
     const totalPhotos = uploadedPhotos.length + imageFiles.length;
     if (totalPhotos > MAX_PHOTOS) {
@@ -310,7 +348,10 @@ function handleFiles(files) {
     }
 
     // Convert each file to Base64
-    imageFiles.forEach(file => uploadToCloudinary(file));
+    imageFiles.forEach((file, index) => {
+        console.log(`📸 Processing file ${index + 1}/${imageFiles.length}:`, file.name);
+        processPhoto(file);
+    });
 }
 
 // ✅ Image Compression Function
@@ -354,8 +395,8 @@ function compressImage(file, maxWidth = 1200, quality = 0.7) {
     });
 }
 
-// ✅ Convert to Base64 with Compression
-async function uploadToCloudinary(file) {
+// ✅ FIXED: Renamed from uploadToCloudinary to processPhoto for clarity
+async function processPhoto(file) {
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
     progressContainer.style.display = 'block';
@@ -370,7 +411,10 @@ async function uploadToCloudinary(file) {
         // Convert to Base64
         const base64String = await new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
+            reader.onload = () => {
+                console.log('✅ Base64 conversion complete');
+                resolve(reader.result);
+            };
             reader.onerror = reject;
             reader.readAsDataURL(compressedBlob);
         });
@@ -384,6 +428,8 @@ async function uploadToCloudinary(file) {
         };
 
         uploadedPhotos.push(photoData);
+        console.log(`✅ Photo added to array. Total photos: ${uploadedPhotos.length}`);
+        
         addPhotoPreview(photoData, uploadedPhotos.length - 1);
         updatePhotoCount();
 
@@ -392,7 +438,7 @@ async function uploadToCloudinary(file) {
         progressBar.textContent = progress + '%';
 
     } catch (error) {
-        console.error('Upload error:', error);
+        console.error('❌ Upload error:', error);
         alert(`Failed to process ${file.name}: ${error.message}`);
     } finally {
         setTimeout(() => {
@@ -405,10 +451,12 @@ async function uploadToCloudinary(file) {
 
 // ✅ Add photo preview for Base64
 function addPhotoPreview(photoData, index) {
+    console.log(`📸 Adding preview for photo ${index + 1}`);
     const preview = document.getElementById('photoPreview');
     
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
+    previewItem.setAttribute('data-index', index);
     previewItem.innerHTML = `
         <img src="${photoData.data}" alt="Resource photo ${index + 1}">
         <button type="button" class="remove-photo" data-index="${index}">×</button>
@@ -422,14 +470,17 @@ function addPhotoPreview(photoData, index) {
     });
 
     preview.appendChild(previewItem);
+    console.log(`✅ Preview added for photo ${index + 1}`);
 }
 
 // Remove photo
 function removePhoto(index) {
+    console.log(`🗑️ Removing photo ${index + 1}`);
     if (confirm('Remove this photo?')) {
         uploadedPhotos.splice(index, 1);
         refreshPhotoPreview();
         updatePhotoCount();
+        console.log(`✅ Photo removed. Remaining: ${uploadedPhotos.length}`);
     }
 }
 
@@ -456,6 +507,8 @@ function updatePhotoCount() {
     } else if (count === MAX_PHOTOS) {
         badge.classList.add('warning');
     }
+    
+    console.log(`📊 Photo count updated: ${count}/${MAX_PHOTOS}`);
 }
 
 // Form validation
@@ -523,9 +576,10 @@ function collectFormData() {
         user = JSON.parse(localStorage.getItem('user') || '{}');
     }
     
+    // ✅ FIXED: Changed from teacherName to staffName
     const formData = {
         userId: user._id || user.id,
-        teacherName: document.getElementById('teacherName').value,
+        staffName: document.getElementById('staffName').value,
         userRole: user.role,
         
         location: document.getElementById('location').value,
@@ -543,6 +597,7 @@ function collectFormData() {
         additionalNeeds: document.getElementById('additionalNeeds').value,
         spaceNotes: document.getElementById('spaceNotes').value,
 
+        // ✅ CRITICAL: Photos are included here
         photos: uploadedPhotos,
 
         notes: document.getElementById('notes').value,
@@ -551,6 +606,11 @@ function collectFormData() {
         submittedAt: new Date().toISOString(),
         status: 'submitted'
     };
+
+    console.log('📦 Form data collected:', {
+        ...formData,
+        photos: `${formData.photos.length} photos (${(JSON.stringify(formData.photos).length / 1024).toFixed(2)} KB)`
+    });
 
     return formData;
 }
@@ -580,7 +640,8 @@ async function handleSubmit(e) {
             weekEnding: formData.weekEnding,
             furniture: formData.furniture.length,
             equipment: formData.equipment.length,
-            photos: formData.photos.length
+            photos: formData.photos.length,
+            payloadSize: `${(JSON.stringify(formData).length / 1024 / 1024).toFixed(2)} MB`
         });
         
         const response = await fetch(`${API_URL}/api/resources/weekly`, {
@@ -605,7 +666,7 @@ async function handleSubmit(e) {
         if (response.ok) {
             alert('✅ Weekly resources report submitted successfully!');
             localStorage.removeItem('weeklyResourcesDraft');
-            window.location.href = 'profile.html'; // ✅ Changed to profile.html
+            window.location.href = 'profile.html';
         } else {
             throw new Error(data.message || data.error || `Server error (${response.status})`);
         }
@@ -717,7 +778,7 @@ function loadDraftIfExists() {
 // Handle cancel
 function handleCancel() {
     if (confirm('Discard this report and return to profile?')) {
-        window.location.href = 'profile.html'; // ✅ Changed to profile.html
+        window.location.href = 'profile.html';
     }
 }
 
