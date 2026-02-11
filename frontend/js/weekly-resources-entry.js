@@ -1,12 +1,10 @@
 /**
- * Weekly Resources Entry - JavaScript with Cloudinary Integration
- * Handles form submission, photo uploads, dynamic item addition, and data validation
+ * Weekly Resources Entry - JavaScript with Base64 Photo Storage
+ * Handles form submission, photo uploads to MongoDB, and data validation
  */
 
 // Configuration
 const API_URL = 'https://school-management-system-wico.onrender.com';
-const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz';
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack_weekly'; // Using underscore for API compatibility
 
 // State Management
 let uploadedPhotos = [];
@@ -311,14 +309,53 @@ function handleFiles(files) {
         return;
     }
 
-    // Upload each file to Cloudinary
+    // Convert each file to Base64
     imageFiles.forEach(file => uploadToCloudinary(file));
 }
 
-// Upload photo to Cloudinary
-// ✅ REPLACE: Upload photo to Base64 instead of Cloudinary
+// ✅ Image Compression Function
+function compressImage(file, maxWidth = 1200, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Compression failed'));
+                        }
+                    },
+                    file.type || 'image/jpeg',
+                    quality
+                );
+            };
+            img.onerror = () => reject(new Error('Image load failed'));
+            img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('File read failed'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// ✅ Convert to Base64 with Compression
 async function uploadToCloudinary(file) {
-    // Show progress
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
     progressContainer.style.display = 'block';
@@ -366,49 +403,7 @@ async function uploadToCloudinary(file) {
     }
 }
 
-// ✅ ADD: Image compression function
-function compressImage(file, maxWidth = 1200, quality = 0.7) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                canvas.toBlob(
-                    (blob) => {
-                        if (blob) {
-                            resolve(blob);
-                        } else {
-                            reject(new Error('Compression failed'));
-                        }
-                    },
-                    file.type || 'image/jpeg',
-                    quality
-                );
-            };
-            img.onerror = () => reject(new Error('Image load failed'));
-            img.src = e.target.result;
-        };
-        reader.onerror = () => reject(new Error('File read failed'));
-        reader.readAsDataURL(file);
-    });
-}
-
-// Add photo preview
-// ✅ UPDATED: Add photo preview for Base64
+// ✅ Add photo preview for Base64
 function addPhotoPreview(photoData, index) {
     const preview = document.getElementById('photoPreview');
     
@@ -453,7 +448,6 @@ function updatePhotoCount() {
     const count = uploadedPhotos.length;
     badge.textContent = `${count} / ${MAX_PHOTOS} photos`;
     
-    // Use CSS classes instead of inline styles
     badge.classList.remove('warning', 'error', 'success');
     if (count < MIN_PHOTOS) {
         badge.classList.add('error');
@@ -466,21 +460,18 @@ function updatePhotoCount() {
 
 // Form validation
 function validateForm() {
-    // Check required fields
     const form = document.getElementById('weeklyResourcesForm');
     if (!form.checkValidity()) {
         form.reportValidity();
         return false;
     }
 
-    // Check minimum photos
     if (uploadedPhotos.length < MIN_PHOTOS) {
         alert(`Please upload at least ${MIN_PHOTOS} photos`);
         document.getElementById('photoUploadArea').scrollIntoView({ behavior: 'smooth' });
         return false;
     }
 
-    // Validate at least one furniture or equipment item
     if (furnitureItems.length === 0 && equipmentItems.length === 0) {
         alert('Please add at least one furniture or equipment item');
         return false;
@@ -527,45 +518,36 @@ function collectEquipmentData() {
 
 // Collect form data
 function collectFormData() {
-    // Get user data with proper fallback
     let user = JSON.parse(localStorage.getItem('userData') || '{}');
     if (!user._id && !user.id) {
         user = JSON.parse(localStorage.getItem('user') || '{}');
     }
     
     const formData = {
-        // User info - FIXED: Use correct field name
         userId: user._id || user.id,
         teacherName: document.getElementById('teacherName').value,
         userRole: user.role,
         
-        // Location
         location: document.getElementById('location').value,
         specificArea: document.getElementById('specificArea').value,
         weekEnding: document.getElementById('weekEnding').value,
 
-        // Inventory data
         furniture: collectFurnitureData(),
         equipment: collectEquipmentData(),
 
-        // Assessment
         overallCondition: document.querySelector('input[name="overallCondition"]:checked')?.value,
         spaceUtilization: document.querySelector('input[name="spaceUtilization"]:checked')?.value,
 
-        // Issues and needs
         repairItems: document.getElementById('repairItems').value,
         replacementItems: document.getElementById('replacementItems').value,
         additionalNeeds: document.getElementById('additionalNeeds').value,
         spaceNotes: document.getElementById('spaceNotes').value,
 
-        // Photos
         photos: uploadedPhotos,
 
-        // Notes
         notes: document.getElementById('notes').value,
         priorityLevel: document.getElementById('priorityLevel').value,
 
-        // Metadata
         submittedAt: new Date().toISOString(),
         status: 'submitted'
     };
@@ -587,14 +569,21 @@ async function handleSubmit(e) {
 
     const formData = collectFormData();
 
-    // Show loading
     document.getElementById('loadingOverlay').classList.add('active');
     document.getElementById('submitBtn').disabled = true;
 
     try {
-        // FIXED: Support both token keys
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/resources/weekly`, {
+        
+        console.log('📤 Submitting to:', `${API_URL}/api/resources/weekly`);
+        console.log('📊 Payload summary:', {
+            weekEnding: formData.weekEnding,
+            furniture: formData.furniture.length,
+            equipment: formData.equipment.length,
+            photos: formData.photos.length
+        });
+        
+        const response = await fetch(`${API_URL}/api/resources/weekly`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -603,24 +592,43 @@ async function handleSubmit(e) {
             body: JSON.stringify(formData)
         });
 
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            console.error('❌ Failed to parse response:', parseError);
+            throw new Error('Invalid server response');
+        }
+        
+        console.log('📥 Server response:', data);
 
         if (response.ok) {
             alert('✅ Weekly resources report submitted successfully!');
-            
-            // Clear draft
             localStorage.removeItem('weeklyResourcesDraft');
-            
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
+            window.location.href = 'profile.html'; // ✅ Changed to profile.html
         } else {
-            // FIXED: Show server error message
-            throw new Error(data.message || 'Submission failed');
+            throw new Error(data.message || data.error || `Server error (${response.status})`);
         }
 
     } catch (error) {
-        console.error('Submission error:', error);
-        alert('❌ Failed to submit report: ' + error.message);
+        console.error('❌ Submission error:', error);
+        
+        let errorMessage = 'Failed to submit report: ';
+        
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage += 'Cannot reach server. Check your internet connection.';
+        } else if (error.message.includes('413') || error.message.includes('too large')) {
+            errorMessage += 'Files too large. Try fewer or smaller photos.';
+        } else if (error.message.includes('401') || error.message.includes('token')) {
+            errorMessage += 'Session expired. Please login again.';
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        } else {
+            errorMessage += error.message;
+        }
+        
+        alert('❌ ' + errorMessage);
     } finally {
         document.getElementById('loadingOverlay').classList.remove('active');
         document.getElementById('submitBtn').disabled = false;
@@ -645,7 +653,6 @@ function loadDraftIfExists() {
     if (draft && confirm('Found a saved draft. Load it?')) {
         const data = JSON.parse(draft);
         
-        // Load basic fields
         document.getElementById('location').value = data.location || '';
         document.getElementById('specificArea').value = data.specificArea || '';
         document.getElementById('repairItems').value = data.repairItems || '';
@@ -655,7 +662,6 @@ function loadDraftIfExists() {
         document.getElementById('notes').value = data.notes || '';
         document.getElementById('priorityLevel').value = data.priorityLevel || 'routine';
 
-        // Load radio selections
         if (data.overallCondition) {
             const radio = document.querySelector(`input[name="overallCondition"][value="${data.overallCondition}"]`);
             if (radio) radio.checked = true;
@@ -666,20 +672,16 @@ function loadDraftIfExists() {
             if (radio) radio.checked = true;
         }
 
-        // Load photos
         if (data.photos && data.photos.length > 0) {
             uploadedPhotos = data.photos;
             refreshPhotoPreview();
             updatePhotoCount();
         }
 
-        // FIXED: Load furniture and equipment items
         if (data.furnitureItemIds && data.furniture) {
-            // Clear existing items first
             furnitureItems = [];
             document.getElementById('furnitureContainer').innerHTML = '';
             
-            // Recreate items with saved data
             data.furnitureItemIds.forEach((itemId, index) => {
                 addFurnitureItem();
                 const furnitureData = data.furniture[index];
@@ -694,11 +696,9 @@ function loadDraftIfExists() {
         }
 
         if (data.equipmentItemIds && data.equipment) {
-            // Clear existing items first
             equipmentItems = [];
             document.getElementById('equipmentContainer').innerHTML = '';
             
-            // Recreate items with saved data
             data.equipmentItemIds.forEach((itemId, index) => {
                 addEquipmentItem();
                 const equipmentData = data.equipment[index];
@@ -716,8 +716,8 @@ function loadDraftIfExists() {
 
 // Handle cancel
 function handleCancel() {
-    if (confirm('Discard this report and return to dashboard?')) {
-        window.location.href = 'dashboard.html';
+    if (confirm('Discard this report and return to profile?')) {
+        window.location.href = 'profile.html'; // ✅ Changed to profile.html
     }
 }
 
