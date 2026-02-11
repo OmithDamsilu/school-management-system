@@ -421,8 +421,8 @@ async function handleSubmit(e) {
             // Clear draft
             localStorage.removeItem('dailyWasteDraft');
             
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
+            // Redirect to profile
+            window.location.href = 'profile.html';
         } else {
             throw new Error(data.message || 'Submission failed');
         }
@@ -504,8 +504,8 @@ function loadDraftIfExists() {
 
 // Handle cancel
 function handleCancel() {
-    if (confirm('Discard this entry and return to dashboard?')) {
-        window.location.href = 'dashboard.html';
+    if (confirm('Discard this entry and return to profile?')) {
+        window.location.href = 'profile.html';
     }
 }
 
