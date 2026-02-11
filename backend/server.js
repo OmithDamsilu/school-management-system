@@ -93,35 +93,57 @@ const weeklyResourcesSchema = new mongoose.Schema({
     submittedByName: { type: String, required: true },
     submittedRole: { type: String, required: true },
     submittedSection: { type: String },
-    weekStartDate: { type: Date, required: true },
-    weekEndDate: { type: Date, required: true },
     
-    // Resource Counts
-    desks: {
-        good: { type: Number, default: 0 },
-        damaged: { type: Number, default: 0 },
-        broken: { type: Number, default: 0 }
-    },
-    chairs: {
-        good: { type: Number, default: 0 },
-        damaged: { type: Number, default: 0 },
-        broken: { type: Number, default: 0 }
-    },
-    whiteboards: {
-        good: { type: Number, default: 0 },
-        damaged: { type: Number, default: 0 },
-        broken: { type: Number, default: 0 }
-    },
-    projectors: {
-        good: { type: Number, default: 0 },
-        damaged: { type: Number, default: 0 },
-        broken: { type: Number, default: 0 }
-    },
+    // Location
+    location: { type: String, required: true },
+    specificArea: { type: String },
+    weekEnding: { type: Date, required: true },
     
-    additionalNotes: { type: String },
+    // Inventory data
+    furniture: [{
+        type: { type: String, required: true },
+        name: { type: String },
+        quantity: { type: Number, required: true },
+        condition: { type: String, required: true },
+        notes: { type: String }
+    }],
+    equipment: [{
+        type: { type: String, required: true },
+        name: { type: String },
+        quantity: { type: Number, required: true },
+        condition: { type: String, required: true },
+        notes: { type: String }
+    }],
+    
+    // Assessment
+    overallCondition: { type: String },
+    spaceUtilization: { type: String },
+    
+    // Issues and needs
+    repairItems: { type: String },
+    replacementItems: { type: String },
+    additionalNeeds: { type: String },
+    spaceNotes: { type: String },
+    
+    // ✅ UPDATED: Photos (supports both formats)
+    photos: [{
+        // Cloudinary format
+        url: { type: String },
+        publicId: { type: String },
+        // Base64 format
+        data: { type: String },
+        mimeType: { type: String },
+        // Common fields
+        originalName: { type: String },
+        size: { type: Number },
+        uploadedAt: { type: Date }
+    }],
+    
+    notes: { type: String },
+    priorityLevel: { type: String },
+    
     createdAt: { type: Date, default: Date.now }
 });
-
 const WeeklyResources = mongoose.model('WeeklyResources', weeklyResourcesSchema);
 
 // Daily Waste Entry Schema
@@ -215,12 +237,22 @@ const unusedSpaceSchema = new mongoose.Schema({
     additionalNotes: { type: String },
     contactPerson: { type: String },
     
-    // Photos
-    photos: [{ type: String }],
+    // ✅ UPDATED: Photos (supports both formats)
+    photos: [{
+        // Cloudinary format
+        url: { type: String },
+        publicId: { type: String },
+        // Base64 format
+        data: { type: String },
+        mimeType: { type: String },
+        // Common fields
+        originalName: { type: String },
+        size: { type: Number },
+        uploadedAt: { type: Date }
+    }],
     
     createdAt: { type: Date, default: Date.now }
 });
-
 const UnusedSpace = mongoose.model('UnusedSpace', unusedSpaceSchema);
 
 // Middleware to verify JWT token
@@ -595,53 +627,117 @@ app.post('/api/waste/daily', authenticateToken, async (req, res) => {
 // ===================== RESOURCES ENTRY ROUTES =====================
 
 // Submit Weekly Resources Entry
+// ✅ UPDATED: Submit Weekly Resources Entry (supports both Cloudinary & Base64)
 app.post('/api/resources/weekly', authenticateToken, async (req, res) => {
     try {
+        console.log('📥 Received weekly resources submission');
+        
         const user = await User.findById(req.user.userId);
         
-        // All authenticated users including Workers can submit resource entries
-        // (Resources are physical items that Workers would know about)
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+
+        // Parse body data
+        const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+        console.log('📊 Resources data:', {
+            userId: user._id,
+            userName: user.fullName,
+            weekEnding: bodyData.weekEnding,
+            furnitureCount: bodyData.furniture?.length || 0,
+            equipmentCount: bodyData.equipment?.length || 0,
+            photosCount: bodyData.photos?.length || 0
+        });
+
+        // Validate required fields
+        if (!bodyData.weekEnding) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Week ending date is required' 
+            });
+        }
+
+        if (!bodyData.location) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Location is required' 
+            });
+        }
+
+        if (!bodyData.photos || !Array.isArray(bodyData.photos) || bodyData.photos.length < 2) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'At least 2 photos are required' 
+            });
+        }
+
+        if ((!bodyData.furniture || bodyData.furniture.length === 0) && 
+            (!bodyData.equipment || bodyData.equipment.length === 0)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'At least one furniture or equipment item is required' 
+            });
+        }
 
         const resourceEntry = new WeeklyResources({
             submittedBy: req.user.userId,
             submittedByName: user.fullName,
             submittedRole: user.role,
             submittedSection: user.section,
-            weekStartDate: req.body.weekStartDate,
-            weekEndDate: req.body.weekEndDate,
-            desks: {
-                good: req.body.desksGood || 0,
-                damaged: req.body.desksDamaged || 0,
-                broken: req.body.desksBroken || 0
-            },
-            chairs: {
-                good: req.body.chairsGood || 0,
-                damaged: req.body.chairsDamaged || 0,
-                broken: req.body.chairsBroken || 0
-            },
-            whiteboards: {
-                good: req.body.whiteboardsGood || 0,
-                damaged: req.body.whiteboardsDamaged || 0,
-                broken: req.body.whiteboardsBroken || 0
-            },
-            projectors: {
-                good: req.body.projectorsGood || 0,
-                damaged: req.body.projectorsDamaged || 0,
-                broken: req.body.projectorsBroken || 0
-            },
-            additionalNotes: req.body.additionalNotes
+            
+            location: bodyData.location,
+            specificArea: bodyData.specificArea,
+            weekEnding: bodyData.weekEnding,
+            
+            furniture: bodyData.furniture || [],
+            equipment: bodyData.equipment || [],
+            
+            overallCondition: bodyData.overallCondition,
+            spaceUtilization: bodyData.spaceUtilization,
+            
+            repairItems: bodyData.repairItems,
+            replacementItems: bodyData.replacementItems,
+            additionalNeeds: bodyData.additionalNeeds,
+            spaceNotes: bodyData.spaceNotes,
+            
+            photos: bodyData.photos, // ✅ Accepts both Cloudinary & Base64
+            
+            notes: bodyData.notes,
+            priorityLevel: bodyData.priorityLevel || 'routine'
         });
 
         await resourceEntry.save();
 
+        console.log('✅ Weekly resources entry saved:', resourceEntry._id);
+
         res.status(201).json({ 
             success: true, 
-            message: 'Resources entry submitted successfully',
-            entry: resourceEntry
+            message: 'Weekly resources report submitted successfully',
+            entry: {
+                _id: resourceEntry._id,
+                weekEnding: resourceEntry.weekEnding,
+                location: resourceEntry.location,
+                photosCount: resourceEntry.photos.length
+            }
         });
     } catch (error) {
-        console.error('Submit resources entry error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('❌ Submit resources entry error:', error);
+        
+        let errorMessage = 'Server error';
+        if (error.name === 'ValidationError') {
+            errorMessage = 'Validation error: ' + Object.values(error.errors).map(e => e.message).join(', ');
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: errorMessage
+        });
     }
 });
 
@@ -734,25 +830,130 @@ app.post('/api/spaces/unused', authenticateToken, upload.array('photos', 10), as
 });
 
 // Get All Unused Space Entries
-app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
+// ✅ UPDATED: Submit Unused Space Entry (supports both Cloudinary & Base64)
+app.post('/api/spaces/unused', authenticateToken, async (req, res) => {
     try {
+        console.log('📥 Received unused space submission');
+        
         const user = await User.findById(req.user.userId);
         
-        let query = {};
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
         
-        // If not Principal or Management Staff, only show their own entries
-        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
-            query.submittedBy = req.user.userId;
+        // Workers cannot submit space entries
+        if (user.role === 'Worker') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Workers are not allowed to submit space entries' 
+            });
         }
 
-        const entries = await UnusedSpace.find(query)
-            .sort({ createdAt: -1 })
-            .limit(100);
+        // Parse body data
+        const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-        res.json({ success: true, entries });
+        console.log('📊 Space data:', {
+            userId: user._id,
+            userName: user.fullName,
+            buildingName: bodyData.buildingName,
+            spaceType: bodyData.spaceType,
+            photosCount: bodyData.photos?.length || 0
+        });
+
+        // Validate required fields
+        if (!bodyData.buildingName || !bodyData.floorNumber || !bodyData.nearLocation || 
+            !bodyData.specificLocation || !bodyData.spaceType || !bodyData.spaceSize || 
+            !bodyData.currentUsage || !bodyData.usageDescription || !bodyData.spaceCondition || 
+            !bodyData.suggestionDetails || !bodyData.priority) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Please fill in all required fields' 
+            });
+        }
+
+        if (!bodyData.photos || !Array.isArray(bodyData.photos) || bodyData.photos.length < 3) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'At least 3 photos are required' 
+            });
+        }
+
+        const spaceEntry = new UnusedSpace({
+            submittedBy: req.user.userId,
+            submittedByName: user.fullName,
+            submittedRole: user.role,
+            submittedSection: user.section,
+            
+            buildingName: bodyData.buildingName,
+            floorNumber: bodyData.floorNumber,
+            roomNumber: bodyData.roomNumber,
+            nearLocation: bodyData.nearLocation,
+            specificLocation: bodyData.specificLocation,
+            
+            spaceType: bodyData.spaceType,
+            otherSpaceType: bodyData.otherSpaceType,
+            
+            spaceSize: bodyData.spaceSize,
+            estimatedLength: bodyData.estimatedLength,
+            estimatedWidth: bodyData.estimatedWidth,
+            
+            currentUsage: bodyData.currentUsage,
+            usageDescription: bodyData.usageDescription,
+            lastUsedDate: bodyData.lastUsedDate,
+            
+            spaceCondition: bodyData.spaceCondition,
+            spaceIssues: bodyData.spaceIssues || [],
+            conditionDetails: bodyData.conditionDetails,
+            
+            facilities: bodyData.facilities || [],
+            facilitiesNotes: bodyData.facilitiesNotes,
+            
+            potentialUses: bodyData.potentialUses || [],
+            suggestionDetails: bodyData.suggestionDetails,
+            priority: bodyData.priority,
+            
+            cleaningNeeds: bodyData.cleaningNeeds,
+            repairNeeds: bodyData.repairNeeds,
+            furnitureNeeds: bodyData.furnitureNeeds,
+            estimatedBudget: bodyData.estimatedBudget,
+            
+            additionalNotes: bodyData.additionalNotes,
+            contactPerson: bodyData.contactPerson,
+            
+            photos: bodyData.photos // ✅ Accepts both Cloudinary & Base64
+        });
+
+        await spaceEntry.save();
+
+        console.log('✅ Unused space entry saved:', spaceEntry._id);
+
+        res.status(201).json({ 
+            success: true, 
+            message: 'Unused space report submitted successfully',
+            entry: {
+                _id: spaceEntry._id,
+                buildingName: spaceEntry.buildingName,
+                spaceType: spaceEntry.spaceType,
+                photosCount: spaceEntry.photos.length
+            }
+        });
     } catch (error) {
-        console.error('Get space entries error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('❌ Submit space entry error:', error);
+        
+        let errorMessage = 'Server error';
+        if (error.name === 'ValidationError') {
+            errorMessage = 'Validation error: ' + Object.values(error.errors).map(e => e.message).join(', ');
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: errorMessage
+        });
     }
 });
 
