@@ -468,7 +468,7 @@ async function handleSubmit(e) {
             localStorage.removeItem('dailyWasteDraft');
             
             // Redirect to dashboard
-            window.location.href = 'dashboard.html';
+            window.location.href = 'profile.html';
         } else {
             // Show specific error from server
             throw new Error(data.message || data.error || `Server error (${response.status})`);
