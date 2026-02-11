@@ -37,7 +37,9 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+// ✅ UPDATED: Increase limit for Base64 photos
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
 // Cloudinary Configuration
@@ -123,6 +125,7 @@ const weeklyResourcesSchema = new mongoose.Schema({
 const WeeklyResources = mongoose.model('WeeklyResources', weeklyResourcesSchema);
 
 // Daily Waste Entry Schema
+// Daily Waste Entry Schema - UPDATED FOR BASE64
 const dailyWasteSchema = new mongoose.Schema({
     submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     submittedByName: { type: String, required: true },
@@ -146,10 +149,18 @@ const dailyWasteSchema = new mongoose.Schema({
     },
     
     additionalNotes: { type: String },
-    photos: [{ type: String }],
+    
+    // ✅ UPDATED: Base64 photo storage
+    photos: [{
+        data: { type: String, required: true },        // Base64 string
+        originalName: { type: String },
+        mimeType: { type: String },
+        size: { type: Number },
+        uploadedAt: { type: Date }
+    }],
+    
     createdAt: { type: Date, default: Date.now }
 });
-
 const DailyWaste = mongoose.model('DailyWaste', dailyWasteSchema);
 
 // Unused Space Entry Schema
@@ -458,9 +469,19 @@ app.post('/api/user/change-password', authenticateToken, async (req, res) => {
 // ===================== WASTE ENTRY ROUTES =====================
 
 // Submit Daily Waste Entry
-app.post('/api/waste/daily', authenticateToken, upload.array('photos', 5), async (req, res) => {
+// ✅ UPDATED: Submit Daily Waste Entry (Base64 Photos)
+app.post('/api/waste/daily', authenticateToken, async (req, res) => {
     try {
+        console.log('📥 Received waste entry submission');
+        
         const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
         
         // Workers cannot submit waste entries
         if (user.role === 'Worker') {
@@ -470,58 +491,104 @@ app.post('/api/waste/daily', authenticateToken, upload.array('photos', 5), async
             });
         }
 
-        const photos = req.files ? req.files.map(file => file.path) : [];
+        // Parse body data (in case it's stringified)
+        const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
+        console.log('📊 Entry data:', {
+            userId: user._id,
+            userName: user.fullName,
+            date: bodyData.entryDate,
+            photosCount: bodyData.photos?.length || 0,
+            totalWaste: bodyData.totalWaste
+        });
+
+        // Validate required fields
+        if (!bodyData.entryDate && !bodyData.date) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Date is required' 
+            });
+        }
+
+        if (!bodyData.photos || !Array.isArray(bodyData.photos) || bodyData.photos.length < 2) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'At least 2 photos are required' 
+            });
+        }
+
+        if (!bodyData.cleanlinessRating || bodyData.cleanlinessRating === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Cleanliness rating is required' 
+            });
+        }
+
+        // Map cleanliness rating (1-5 stars) to text
+        const mapCleanlinessRating = (rating) => {
+            const ratingMap = {
+                5: 'Excellent',
+                4: 'Good',
+                3: 'Good',
+                2: 'Fair',
+                1: 'Poor'
+            };
+            return ratingMap[rating] || 'Fair';
+        };
+
+        // Create waste entry
         const wasteEntry = new DailyWaste({
             submittedBy: req.user.userId,
             submittedByName: user.fullName,
             submittedRole: user.role,
-            submittedSection: user.section,
+            submittedSection: user.section || bodyData.classSection,
             submittedGrade: user.grade,
-            date: req.body.date,
-            paperWaste: req.body.paperWaste || 0,
-            plasticWaste: req.body.plasticWaste || 0,
-            foodWaste: req.body.foodWaste || 0,
-            generalWaste: req.body.generalWaste || 0,
-            wasProperlySegregated: req.body.wasProperlySegregated === 'true',
-            classroomCleanliness: req.body.classroomCleanliness,
-            additionalNotes: req.body.additionalNotes,
-            photos
+            date: bodyData.entryDate || bodyData.date,
+            
+            // Map frontend data to backend schema
+            paperWaste: bodyData.wasteData?.recyclable?.amount || 0,
+            plasticWaste: bodyData.wasteData?.organic?.amount || 0,
+            foodWaste: bodyData.wasteData?.nonRecyclable?.amount || 0,
+            generalWaste: bodyData.totalWaste || 0,
+            
+            wasProperlySegregated: bodyData.separationStatus === 'properly_separated',
+            classroomCleanliness: mapCleanlinessRating(bodyData.cleanlinessRating),
+            additionalNotes: bodyData.notes || '',
+            
+            // ✅ Store Base64 photos directly
+            photos: bodyData.photos
         });
 
         await wasteEntry.save();
 
+        console.log('✅ Waste entry saved successfully:', wasteEntry._id);
+
         res.status(201).json({ 
             success: true, 
             message: 'Waste entry submitted successfully',
-            entry: wasteEntry
+            entry: {
+                _id: wasteEntry._id,
+                date: wasteEntry.date,
+                totalWaste: wasteEntry.generalWaste,
+                photosCount: wasteEntry.photos.length,
+                cleanliness: wasteEntry.classroomCleanliness
+            }
         });
     } catch (error) {
-        console.error('Submit waste entry error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
-
-// Get All Waste Entries (for Management/Principal)
-app.get('/api/waste/daily', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
+        console.error('❌ Submit waste entry error:', error);
         
-        let query = {};
-        
-        // If not Principal or Management Staff, only show their own entries
-        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
-            query.submittedBy = req.user.userId;
+        // Better error messages
+        let errorMessage = 'Server error';
+        if (error.name === 'ValidationError') {
+            errorMessage = 'Validation error: ' + Object.values(error.errors).map(e => e.message).join(', ');
+        } else if (error.message) {
+            errorMessage = error.message;
         }
-
-        const entries = await DailyWaste.find(query)
-            .sort({ date: -1 })
-            .limit(100);
-
-        res.json({ success: true, entries });
-    } catch (error) {
-        console.error('Get waste entries error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        
+        res.status(500).json({ 
+            success: false, 
+            message: errorMessage
+        });
     }
 });
 
