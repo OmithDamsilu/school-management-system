@@ -1,12 +1,10 @@
 /**
- * Daily Waste Entry - JavaScript with Cloudinary Integration
- * Handles form submission, photo uploads, and data validation
+ * Daily Waste Entry - JavaScript with Base64 Photo Storage
+ * Handles form submission, photo uploads to MongoDB, and data validation
  */
 
 // Configuration
 const API_URL = 'https://school-management-system-wico.onrender.com';
-const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz'; // Replace with your Cloudinary cloud name
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack daily'; // Replace with your upload preset
 
 // State Management
 let uploadedPhotos = [];
@@ -33,7 +31,7 @@ function loadUserInfo() {
         user = JSON.parse(localStorage.getItem('user') || '{}');
     }
     
-    if (!user.fullName) {  // ✅ Fixed: was 'userData.fullName'
+    if (!user.fullName) {
         alert('Please login first');
         window.location.href = 'login.html';
         return;
@@ -145,42 +143,36 @@ function handleFiles(files) {
         return;
     }
 
-    // Upload each file to Cloudinary
-    imageFiles.forEach(file => uploadToCloudinary(file));
+    // Convert each file to Base64 and store in MongoDB
+    imageFiles.forEach(file => convertToBase64(file));
 }
 
-// Upload photo to Cloudinary
-async function uploadToCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'echotrack/daily-waste');
-
+// Convert photo to Base64 - MODIFIED to replace Cloudinary upload
+async function convertToBase64(file) {
     // Show progress
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
     progressContainer.style.display = 'block';
 
     try {
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
+        // Read file as Base64
+        const base64String = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                // Get the complete base64 data URL
+                const base64 = reader.result;
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
 
-        if (!response.ok) {
-            throw new Error('Upload failed');
-        }
-
-        const data = await response.json();
-
-        // Add to uploaded photos
+        // Add to uploaded photos array
         const photoData = {
-            url: data.secure_url,
-            publicId: data.public_id,
+            data: base64String,
             originalName: file.name,
+            mimeType: file.type,
+            size: file.size,
             uploadedAt: new Date().toISOString()
         };
 
@@ -195,7 +187,7 @@ async function uploadToCloudinary(file) {
 
     } catch (error) {
         console.error('Upload error:', error);
-        alert(`Failed to upload ${file.name}. Please try again.`);
+        alert(`Failed to process ${file.name}. Please try again.`);
     } finally {
         // Hide progress after a delay
         setTimeout(() => {
@@ -206,14 +198,14 @@ async function uploadToCloudinary(file) {
     }
 }
 
-// Add photo preview
+// Add photo preview - MODIFIED to use Base64 data
 function addPhotoPreview(photoData, index) {
     const preview = document.getElementById('photoPreview');
     
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
     previewItem.innerHTML = `
-        <img src="${photoData.url}" alt="Waste photo ${index + 1}">
+        <img src="${photoData.data}" alt="Waste photo ${index + 1}">
         <button type="button" class="remove-photo" data-index="${index}">×</button>
         <div class="photo-info">
             ${photoData.originalName}
@@ -317,12 +309,12 @@ function validateForm() {
     return true;
 }
 
-// Collect form data - FIXED to match backend schema
+// Collect form data
 function collectFormData() {
-const user = JSON.parse(localStorage.getItem('userData') || '{}');
-if (!user._id && !user.id) {
-    user = JSON.parse(localStorage.getItem('user') || '{}');
-}
+    const user = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (!user._id && !user.id) {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    }
     
     // Get checked checkboxes
     const getCheckedValues = (name) => {
@@ -330,61 +322,57 @@ if (!user._id && !user.id) {
             .map(cb => cb.value);
     };
 
-    // Get waste amounts
-    const recyclableAmount = parseFloat(document.getElementById('recyclableAmount').value) || 0;
-    const organicAmount = parseFloat(document.getElementById('organicAmount').value) || 0;
-    const nonRecyclableAmount = parseFloat(document.getElementById('nonRecyclableAmount').value) || 0;
-    
-    // Map recyclable items to paper/plastic
-    const recyclableItems = getCheckedValues('recyclableItems');
-    let paperWaste = 0;
-    let plasticWaste = 0;
-    
-    if (recyclableItems.includes('paper') || recyclableItems.includes('cardboard')) {
-        paperWaste = recyclableAmount * 0.5;
-    }
-    if (recyclableItems.includes('plastic') || recyclableItems.includes('bottles')) {
-        plasticWaste = recyclableAmount * 0.5;
-    }
-    if (recyclableItems.length === 1) {
-        if (recyclableItems.includes('paper') || recyclableItems.includes('cardboard')) {
-            paperWaste = recyclableAmount;
-            plasticWaste = 0;
-        } else {
-            plasticWaste = recyclableAmount;
-            paperWaste = 0;
-        }
-    }
-
-    // Map separation status to boolean
-    const separationStatus = document.querySelector('input[name="separationStatus"]:checked')?.value;
-    const wasProperlySegregated = separationStatus === 'properly_separated';
-
-    // Map star rating to cleanliness enum
-    const cleanlinessMap = {
-        1: 'Poor',
-        2: 'Fair',
-        3: 'Fair',
-        4: 'Good',
-        5: 'Excellent'
-    };
-
     const formData = {
-        date: document.getElementById('entryDate').value,
-        paperWaste: paperWaste,
-        plasticWaste: plasticWaste,
-        foodWaste: organicAmount,
-        generalWaste: nonRecyclableAmount,
-        wasProperlySegregated: wasProperlySegregated,
-        classroomCleanliness: cleanlinessMap[selectedRating],
-        additionalNotes: document.getElementById('notes').value || '',
-        photos: uploadedPhotos.map(photo => photo.url)
+        // User info
+        userId: user._id || user.id,
+        teacherName: document.getElementById('teacherName').value,
+        userRole: user.role,
+        classSection: document.getElementById('classSection').value,
+        entryDate: document.getElementById('entryDate').value,
+
+        // Waste data
+        wasteData: {
+            recyclable: {
+                amount: parseFloat(document.getElementById('recyclableAmount').value) || 0,
+                items: getCheckedValues('recyclableItems')
+            },
+            organic: {
+                amount: parseFloat(document.getElementById('organicAmount').value) || 0,
+                items: getCheckedValues('organicItems')
+            },
+            nonRecyclable: {
+                amount: parseFloat(document.getElementById('nonRecyclableAmount').value) || 0
+            }
+        },
+
+        // Total waste
+        totalWaste: (
+            (parseFloat(document.getElementById('recyclableAmount').value) || 0) +
+            (parseFloat(document.getElementById('organicAmount').value) || 0) +
+            (parseFloat(document.getElementById('nonRecyclableAmount').value) || 0)
+        ),
+
+        // Quality metrics
+        separationStatus: document.querySelector('input[name="separationStatus"]:checked')?.value,
+        paperManagement: getCheckedValues('paperManagement'),
+        cleanlinessRating: selectedRating,
+
+        // Photos - MODIFIED: Now sends Base64 data instead of Cloudinary URLs
+        photos: uploadedPhotos,
+
+        // Notes
+        notes: document.getElementById('notes').value,
+        urgencyLevel: document.getElementById('urgencyLevel').value,
+
+        // Metadata
+        submittedAt: new Date().toISOString(),
+        status: 'submitted'
     };
 
     return formData;
 }
 
-// Handle form submission - FIXED API endpoint
+// Handle form submission
 async function handleSubmit(e) {
     e.preventDefault();
 
@@ -404,7 +392,7 @@ async function handleSubmit(e) {
 
     try {
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/api/waste/daily`, {
+        const response = await fetch(`${API_URL}/waste/daily`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -421,8 +409,8 @@ async function handleSubmit(e) {
             // Clear draft
             localStorage.removeItem('dailyWasteDraft');
             
-            // Redirect to profile
-            window.location.href = 'profile.html';
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
         } else {
             throw new Error(data.message || 'Submission failed');
         }
@@ -504,8 +492,8 @@ function loadDraftIfExists() {
 
 // Handle cancel
 function handleCancel() {
-    if (confirm('Discard this entry and return to profile?')) {
-        window.location.href = 'profile.html';
+    if (confirm('Discard this entry and return to dashboard?')) {
+        window.location.href = 'dashboard.html';
     }
 }
 
@@ -514,7 +502,9 @@ document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     if (confirm('Are you sure you want to logout? Unsaved changes will be lost.')) {
         localStorage.removeItem('user');
+        localStorage.removeItem('userData');
         localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
         window.location.href = 'login.html';
     }
 });
