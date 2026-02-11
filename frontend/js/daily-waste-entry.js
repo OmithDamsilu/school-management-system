@@ -317,7 +317,7 @@ function validateForm() {
     return true;
 }
 
-// Collect form data
+// Collect form data - FIXED to match backend schema
 function collectFormData() {
 const user = JSON.parse(localStorage.getItem('userData') || '{}');
 if (!user._id && !user.id) {
@@ -330,57 +330,61 @@ if (!user._id && !user.id) {
             .map(cb => cb.value);
     };
 
+    // Get waste amounts
+    const recyclableAmount = parseFloat(document.getElementById('recyclableAmount').value) || 0;
+    const organicAmount = parseFloat(document.getElementById('organicAmount').value) || 0;
+    const nonRecyclableAmount = parseFloat(document.getElementById('nonRecyclableAmount').value) || 0;
+    
+    // Map recyclable items to paper/plastic
+    const recyclableItems = getCheckedValues('recyclableItems');
+    let paperWaste = 0;
+    let plasticWaste = 0;
+    
+    if (recyclableItems.includes('paper') || recyclableItems.includes('cardboard')) {
+        paperWaste = recyclableAmount * 0.5;
+    }
+    if (recyclableItems.includes('plastic') || recyclableItems.includes('bottles')) {
+        plasticWaste = recyclableAmount * 0.5;
+    }
+    if (recyclableItems.length === 1) {
+        if (recyclableItems.includes('paper') || recyclableItems.includes('cardboard')) {
+            paperWaste = recyclableAmount;
+            plasticWaste = 0;
+        } else {
+            plasticWaste = recyclableAmount;
+            paperWaste = 0;
+        }
+    }
+
+    // Map separation status to boolean
+    const separationStatus = document.querySelector('input[name="separationStatus"]:checked')?.value;
+    const wasProperlySegregated = separationStatus === 'properly_separated';
+
+    // Map star rating to cleanliness enum
+    const cleanlinessMap = {
+        1: 'Poor',
+        2: 'Fair',
+        3: 'Fair',
+        4: 'Good',
+        5: 'Excellent'
+    };
+
     const formData = {
-        // User info
-        userId: user._id || user.id,
-        teacherName: document.getElementById('teacherName').value,
-        userRole: user.role,
-        classSection: document.getElementById('classSection').value,
-        entryDate: document.getElementById('entryDate').value,
-
-        // Waste data
-        wasteData: {
-            recyclable: {
-                amount: parseFloat(document.getElementById('recyclableAmount').value) || 0,
-                items: getCheckedValues('recyclableItems')
-            },
-            organic: {
-                amount: parseFloat(document.getElementById('organicAmount').value) || 0,
-                items: getCheckedValues('organicItems')
-            },
-            nonRecyclable: {
-                amount: parseFloat(document.getElementById('nonRecyclableAmount').value) || 0
-            }
-        },
-
-        // Total waste
-        totalWaste: (
-            (parseFloat(document.getElementById('recyclableAmount').value) || 0) +
-            (parseFloat(document.getElementById('organicAmount').value) || 0) +
-            (parseFloat(document.getElementById('nonRecyclableAmount').value) || 0)
-        ),
-
-        // Quality metrics
-        separationStatus: document.querySelector('input[name="separationStatus"]:checked')?.value,
-        paperManagement: getCheckedValues('paperManagement'),
-        cleanlinessRating: selectedRating,
-
-        // Photos
-        photos: uploadedPhotos,
-
-        // Notes
-        notes: document.getElementById('notes').value,
-        urgencyLevel: document.getElementById('urgencyLevel').value,
-
-        // Metadata
-        submittedAt: new Date().toISOString(),
-        status: 'submitted'
+        date: document.getElementById('entryDate').value,
+        paperWaste: paperWaste,
+        plasticWaste: plasticWaste,
+        foodWaste: organicAmount,
+        generalWaste: nonRecyclableAmount,
+        wasProperlySegregated: wasProperlySegregated,
+        classroomCleanliness: cleanlinessMap[selectedRating],
+        additionalNotes: document.getElementById('notes').value || '',
+        photos: uploadedPhotos.map(photo => photo.url)
     };
 
     return formData;
 }
 
-// Handle form submission
+// Handle form submission - FIXED API endpoint
 async function handleSubmit(e) {
     e.preventDefault();
 
@@ -400,7 +404,7 @@ async function handleSubmit(e) {
 
     try {
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/waste/daily`, {
+        const response = await fetch(`${API_URL}/api/waste/daily`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
