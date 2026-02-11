@@ -146,33 +146,31 @@ function handleFiles(files) {
     // Convert each file to Base64 and store in MongoDB
     imageFiles.forEach(file => convertToBase64(file));
 }
-
-// Convert photo to Base64 - MODIFIED to replace Cloudinary upload
+// ✅ UPDATED: Convert photo to Base64 with compression
 async function convertToBase64(file) {
-    // Show progress
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
     progressContainer.style.display = 'block';
 
     try {
-        // Read file as Base64
+        // Compress image first
+        console.log(`📸 Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
+        const compressedBlob = await compressImage(file);
+        console.log(`✅ Compressed to ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
+        
+        // Convert compressed blob to base64
         const base64String = await new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => {
-                // Get the complete base64 data URL
-                const base64 = reader.result;
-                resolve(base64);
-            };
+            reader.onload = () => resolve(reader.result);
             reader.onerror = reject;
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(compressedBlob);
         });
 
-        // Add to uploaded photos array
         const photoData = {
             data: base64String,
             originalName: file.name,
             mimeType: file.type,
-            size: file.size,
+            size: compressedBlob.size,
             uploadedAt: new Date().toISOString()
         };
 
@@ -180,16 +178,62 @@ async function convertToBase64(file) {
         addPhotoPreview(photoData, uploadedPhotos.length - 1);
         updatePhotoCount();
 
-        // Update progress
         const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
         progressBar.style.width = progress + '%';
         progressBar.textContent = progress + '%';
 
     } catch (error) {
         console.error('Upload error:', error);
-        alert(`Failed to process ${file.name}. Please try again.`);
+        alert(`Failed to process ${file.name}: ${error.message}`);
     } finally {
-        // Hide progress after a delay
+        setTimeout(() => {
+            if (uploadedPhotos.length === 0) {
+                progressContainer.style.display = 'none';
+            }
+        }, 1000);
+    }
+}
+// Convert photo to Base64 - MODIFIED to replace Cloudinary upload
+// ✅ UPDATED: Convert photo to Base64 with compression
+async function convertToBase64(file) {
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    progressContainer.style.display = 'block';
+
+    try {
+        // Compress image first
+        console.log(`📸 Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
+        const compressedBlob = await compressImage(file);
+        console.log(`✅ Compressed to ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
+        
+        // Convert compressed blob to base64
+        const base64String = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(compressedBlob);
+        });
+
+        const photoData = {
+            data: base64String,
+            originalName: file.name,
+            mimeType: file.type,
+            size: compressedBlob.size,
+            uploadedAt: new Date().toISOString()
+        };
+
+        uploadedPhotos.push(photoData);
+        addPhotoPreview(photoData, uploadedPhotos.length - 1);
+        updatePhotoCount();
+
+        const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
+        progressBar.style.width = progress + '%';
+        progressBar.textContent = progress + '%';
+
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert(`Failed to process ${file.name}: ${error.message}`);
+    } finally {
         setTimeout(() => {
             if (uploadedPhotos.length === 0) {
                 progressContainer.style.display = 'none';
@@ -392,7 +436,16 @@ async function handleSubmit(e) {
 
     try {
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/waste/daily`, {
+        
+        console.log('📤 Submitting to:', `${API_URL}/api/waste/daily`);
+        console.log('📊 Payload summary:', {
+            date: formData.entryDate,
+            photos: formData.photos.length,
+            totalWaste: formData.totalWaste,
+            rating: formData.cleanlinessRating
+        });
+        
+        const response = await fetch(`${API_URL}/api/waste/daily`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -401,7 +454,15 @@ async function handleSubmit(e) {
             body: JSON.stringify(formData)
         });
 
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            console.error('❌ Failed to parse response:', parseError);
+            throw new Error('Invalid server response');
+        }
+        
+        console.log('📥 Server response:', data);
 
         if (response.ok) {
             alert('✅ Daily waste entry submitted successfully!');
@@ -412,12 +473,30 @@ async function handleSubmit(e) {
             // Redirect to dashboard
             window.location.href = 'dashboard.html';
         } else {
-            throw new Error(data.message || 'Submission failed');
+            // Show specific error from server
+            throw new Error(data.message || data.error || `Server error (${response.status})`);
         }
 
     } catch (error) {
-        console.error('Submission error:', error);
-        alert('❌ Failed to submit entry: ' + error.message);
+        console.error('❌ Submission error:', error);
+        
+        // User-friendly error messages
+        let errorMessage = 'Failed to submit entry: ';
+        
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage += 'Cannot reach server. Check your internet connection.';
+        } else if (error.message.includes('413') || error.message.includes('too large')) {
+            errorMessage += 'Files too large. Try fewer or smaller photos.';
+        } else if (error.message.includes('401') || error.message.includes('token')) {
+            errorMessage += 'Session expired. Please login again.';
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        } else {
+            errorMessage += error.message;
+        }
+        
+        alert('❌ ' + errorMessage);
     } finally {
         document.getElementById('loadingOverlay').classList.remove('active');
         document.getElementById('submitBtn').disabled = false;
