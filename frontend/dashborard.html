@@ -264,6 +264,16 @@
             margin-bottom: 20px;
         }
 
+        .debug-info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .dashboard-container {
@@ -309,7 +319,7 @@
             <div class="nav-center">
                 <ul class="nav-links">
                     <li><a href="profile.html">Home</a></li>
-                    <li><a href="dashborard.html" class="active">Dashboard</a></li>
+                    <li><a href="dashboard-updated.html" class="active">Dashboard</a></li>
                 </ul>
             </div>
 
@@ -471,26 +481,29 @@
             }
         }
 
-        // Load Daily Waste Entries
+        // Load Daily Waste Entries - FIXED
         async function loadWasteEntries() {
             const container = document.getElementById('wasteEntriesContainer');
             container.innerHTML = '<div class="loading">Loading waste entries...</div>';
 
             try {
-                console.log('Loading waste entries...');
+                console.log('📥 Loading waste entries from /api/waste/daily');
                 const response = await apiCall('/api/waste/daily');
                 
-                console.log('Waste entries response:', response);
+                console.log('✅ Waste entries response:', response);
                 
                 if (response.success && response.entries && response.entries.length > 0) {
+                    console.log('Found', response.entries.length, 'waste entries');
                     container.innerHTML = '<div class="entries-grid"></div>';
                     const grid = container.querySelector('.entries-grid');
                     
-                    response.entries.forEach(entry => {
+                    response.entries.forEach((entry, index) => {
+                        console.log(`Processing waste entry ${index + 1}:`, entry);
                         const card = createWasteCard(entry);
                         grid.appendChild(card);
                     });
                 } else {
+                    console.log('No waste entries found');
                     container.innerHTML = `
                         <div class="no-data">
                             <div class="no-data-icon">🗑️</div>
@@ -500,7 +513,7 @@
                     `;
                 }
             } catch (error) {
-                console.error('Error loading waste entries:', error);
+                console.error('❌ Error loading waste entries:', error);
                 container.innerHTML = `
                     <div class="error-message">
                         <strong>Error Loading Data:</strong> ${error.message}
@@ -508,32 +521,36 @@
                     <div class="no-data">
                         <div class="no-data-icon">❌</div>
                         <h3>Failed to Load Waste Entries</h3>
-                        <p>Please make sure the backend GET route for /api/waste/daily is implemented.</p>
+                        <p>Check the browser console for debugging information.</p>
+                        <div class="debug-info">Error: ${error.message}</div>
                     </div>
                 `;
             }
         }
 
-        // Load Weekly Resource Entries
+        // Load Weekly Resource Entries - FIXED
         async function loadResourceEntries() {
             const container = document.getElementById('resourceEntriesContainer');
             container.innerHTML = '<div class="loading">Loading resource entries...</div>';
 
             try {
-                console.log('Loading resource entries...');
-                const response = await apiCall(API_CONFIG.ENDPOINTS.RESOURCES_WEEKLY);
+                console.log('📥 Loading resource entries from /api/resources/weekly');
+                const response = await apiCall('/api/resources/weekly');
                 
-                console.log('Resource entries response:', response);
+                console.log('✅ Resource entries response:', response);
                 
                 if (response.success && response.entries && response.entries.length > 0) {
+                    console.log('Found', response.entries.length, 'resource entries');
                     container.innerHTML = '<div class="entries-grid"></div>';
                     const grid = container.querySelector('.entries-grid');
                     
-                    response.entries.forEach(entry => {
+                    response.entries.forEach((entry, index) => {
+                        console.log(`Processing resource entry ${index + 1}:`, entry);
                         const card = createResourceCard(entry);
                         grid.appendChild(card);
                     });
                 } else {
+                    console.log('No resource entries found');
                     container.innerHTML = `
                         <div class="no-data">
                             <div class="no-data-icon">📊</div>
@@ -543,7 +560,7 @@
                     `;
                 }
             } catch (error) {
-                console.error('Error loading resource entries:', error);
+                console.error('❌ Error loading resource entries:', error);
                 container.innerHTML = `
                     <div class="error-message">
                         <strong>Error Loading Data:</strong> ${error.message}
@@ -551,32 +568,36 @@
                     <div class="no-data">
                         <div class="no-data-icon">❌</div>
                         <h3>Failed to Load Resource Entries</h3>
-                        <p>Check the browser console for more details.</p>
+                        <p>Check the browser console for debugging information.</p>
+                        <div class="debug-info">Error: ${error.message}</div>
                     </div>
                 `;
             }
         }
 
-        // Load Unused Space Entries
+        // Load Unused Space Entries - FIXED
         async function loadSpaceEntries() {
             const container = document.getElementById('spaceEntriesContainer');
             container.innerHTML = '<div class="loading">Loading space entries...</div>';
 
             try {
-                console.log('Loading space entries...');
+                console.log('📥 Loading space entries from /api/spaces/unused');
                 const response = await apiCall('/api/spaces/unused');
                 
-                console.log('Space entries response:', response);
+                console.log('✅ Space entries response:', response);
                 
                 if (response.success && response.entries && response.entries.length > 0) {
+                    console.log('Found', response.entries.length, 'space entries');
                     container.innerHTML = '<div class="entries-grid"></div>';
                     const grid = container.querySelector('.entries-grid');
                     
-                    response.entries.forEach(entry => {
+                    response.entries.forEach((entry, index) => {
+                        console.log(`Processing space entry ${index + 1}:`, entry);
                         const card = createSpaceCard(entry);
                         grid.appendChild(card);
                     });
                 } else {
+                    console.log('No space entries found');
                     container.innerHTML = `
                         <div class="no-data">
                             <div class="no-data-icon">🏢</div>
@@ -586,7 +607,7 @@
                     `;
                 }
             } catch (error) {
-                console.error('Error loading space entries:', error);
+                console.error('❌ Error loading space entries:', error);
                 container.innerHTML = `
                     <div class="error-message">
                         <strong>Error Loading Data:</strong> ${error.message}
@@ -594,7 +615,8 @@
                     <div class="no-data">
                         <div class="no-data-icon">❌</div>
                         <h3>Failed to Load Space Entries</h3>
-                        <p>Please make sure the backend GET route for /api/spaces/unused is implemented.</p>
+                        <p>Check the browser console for debugging information.</p>
+                        <div class="debug-info">Error: ${error.message}</div>
                     </div>
                 `;
             }
@@ -605,7 +627,7 @@
             const card = document.createElement('div');
             card.className = 'entry-card';
             
-            const date = new Date(entry.date).toLocaleDateString();
+            const date = entry.date ? new Date(entry.date).toLocaleDateString() : 'N/A';
             
             card.innerHTML = `
                 <div class="entry-header">
@@ -719,7 +741,7 @@
             const card = document.createElement('div');
             card.className = 'entry-card';
             
-            const date = new Date(entry.createdAt).toLocaleDateString();
+            const date = entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : 'N/A';
             
             card.innerHTML = `
                 <div class="entry-header">
@@ -781,7 +803,7 @@
 
         // Initialize dashboard
         window.addEventListener('DOMContentLoaded', async () => {
-            console.log('Dashboard loaded');
+            console.log('🚀 Dashboard loaded');
             await checkAuthorization();
             await loadStatistics();
             await loadWasteEntries(); // Load initial tab
