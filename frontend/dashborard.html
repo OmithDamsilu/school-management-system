@@ -420,23 +420,29 @@
         }
 
         // Check if user is authorized (Principal or Management Staff)
-        async function checkAuthorization() {
-            try {
-                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                console.log('User role:', userData.role);
-                
-                // Allow Principal, Management Staff, Deputy Principal, and Assistant Principal
-                const allowedRoles = ['Principal', 'Management Staff', 'Deputy Principal', 'Assistant Principal'];
-                
-                if (!allowedRoles.includes(userData.role)) {
-                    alert('Access denied. This page is only for Principal and Management Staff.');
-                    window.location.href = 'profile.html';
-                }
-            } catch (error) {
-                console.error('Auth check error:', error);
-                window.location.href = 'login.html';
-            }
+async function checkAuthorization() {
+    try {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        console.log('User role:', userData.role);
+        
+        // ✅ NOW INCLUDES SECTION HEAD
+        const allowedRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'  // ✅ ADDED
+        ];
+        
+        if (!allowedRoles.includes(userData.role)) {
+            alert('Access denied. This page is only for Principal and Management Staff.');
+            window.location.href = 'profile.html';
         }
+    } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = 'login.html';
+    }
+}
 
         // Tab switching
         function switchTab(tabName, event) {
