@@ -918,21 +918,45 @@ app.post('/api/spaces/unused', authenticateToken, async (req, res) => {
 // Get Dashboard Statistics (for Principal/Management)
 app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     try {
+        console.log('📊 Dashboard stats request from user:', req.user.userId);
+        
         const user = await User.findById(req.user.userId);
         
-        // Only Principal and Management Staff can access dashboard stats
-        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
-            return res.status(403).json({ 
+        if (!user) {
+            return res.status(404).json({ 
                 success: false, 
-                message: 'Access denied' 
+                message: 'User not found' 
             });
         }
+        
+        console.log('👤 User role:', user.role);
+        
+        // ✅ UPDATED: Include ALL management roles that should access dashboard
+        const allowedRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',  // ← MUST INCLUDE THIS (was missing!)
+            'Section Head'          // ← MUST INCLUDE THIS (was missing!)
+        ];
+        
+        if (!allowedRoles.includes(user.role)) {
+            console.log('❌ Access denied for role:', user.role);
+            return res.status(403).json({ 
+                success: false, 
+                message: `Access denied. Only management staff can access dashboard. Your role: ${user.role}` 
+            });
+        }
+        
+        console.log('✅ Access granted for role:', user.role);
 
         // Get statistics
         const totalUsers = await User.countDocuments();
         const totalWasteEntries = await DailyWaste.countDocuments();
         const totalResourceEntries = await WeeklyResources.countDocuments();
         const totalSpaceEntries = await UnusedSpace.countDocuments();
+
+        console.log('📈 Stats:', { totalUsers, totalWasteEntries, totalResourceEntries, totalSpaceEntries });
 
         // Get recent entries
         const recentWasteEntries = await DailyWaste.find()
@@ -962,11 +986,154 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get dashboard stats error:', error);
+        console.error('❌ Get dashboard stats error:', error);
+        res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+    }
+});
+
+// ===================== OTHER ENDPOINTS ALSO NEED UPDATES =====================
+// Make sure your GET endpoints for waste, resources, and spaces also allow these roles:
+
+// Get Daily Waste Entries
+app.get('/api/waste/daily', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+        
+        let query = {};
+        
+        // ✅ If not management staff, only show their own entries
+        const managementRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'
+        ];
+        
+        if (!managementRoles.includes(user.role)) {
+            query.submittedBy = req.user.userId;
+        }
+
+        const entries = await DailyWaste.find(query)
+            .sort({ date: -1, createdAt: -1 })
+            .limit(100)
+            .lean();
+
+        console.log('✅ Found', entries.length, 'waste entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
+    } catch (error) {
+        console.error('Get waste entries error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        });
+    }
+});
+
+// Get Weekly Resources Entries
+app.get('/api/resources/weekly', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+        
+        let query = {};
+        
+        // ✅ If not management staff, only show their own entries
+        const managementRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'
+        ];
+        
+        if (!managementRoles.includes(user.role)) {
+            query.submittedBy = req.user.userId;
+        }
+
+        const entries = await WeeklyResources.find(query)
+            .sort({ weekEnding: -1, createdAt: -1 })
+            .limit(100)
+            .lean();
+
+        console.log('✅ Found', entries.length, 'resource entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
+    } catch (error) {
+        console.error('Get resources entries error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
+// Get Unused Space Entries
+app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+        
+        let query = {};
+        
+        // ✅ If not management staff, only show their own entries
+        const managementRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'
+        ];
+        
+        if (!managementRoles.includes(user.role)) {
+            query.submittedBy = req.user.userId;
+        }
+
+        const entries = await UnusedSpace.find(query)
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .lean();
+
+        console.log('✅ Found', entries.length, 'space entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
+    } catch (error) {
+        console.error('Get space entries error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        });
+    }
+});
 // ===================== GET DAILY WASTE ENTRIES =====================
 // Add this AFTER the POST /api/waste/daily route
 app.get('/api/waste/daily', authenticateToken, async (req, res) => {
