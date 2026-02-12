@@ -274,6 +274,15 @@
             font-family: monospace;
         }
 
+        .auth-check {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: #666;
+            text-align: center;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .dashboard-container {
@@ -336,6 +345,11 @@
         <div class="dashboard-header">
             <h1>📊 Management Dashboard</h1>
             <p>View and monitor all submitted data</p>
+        </div>
+
+        <!-- Auth Status -->
+        <div id="authStatus" class="auth-check" style="display: none;">
+            Checking authorization... Please wait.
         </div>
 
         <!-- Statistics Cards -->
@@ -413,36 +427,47 @@
 
     <script src="js/config.js"></script>
     <script>
-        // Check authentication
+        // ✅ FIX #1: Check authentication FIRST
         if (!isAuthenticated()) {
-            console.log('Not authenticated, redirecting to login...');
+            console.log('❌ Not authenticated, redirecting to login...');
             window.location.href = 'login.html';
+        } else {
+            console.log('✅ User is authenticated');
         }
 
-        // Check if user is authorized (Principal or Management Staff)
-async function checkAuthorization() {
-    try {
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        console.log('User role:', userData.role);
-        
-        // ✅ NOW INCLUDES SECTION HEAD
-        const allowedRoles = [
-            'Principal',
-            'Management Staff',
-            'Deputy Principal',
-            'Assistant Principal',
-            'Section Head'  // ✅ ADDED
-        ];
-        
-        if (!allowedRoles.includes(userData.role)) {
-            alert('Access denied. This page is only for Principal and Management Staff.');
-            window.location.href = 'profile.html';
+        // ✅ FIX #2: Proper authorization check with all allowed roles
+        async function checkAuthorization() {
+            return new Promise((resolve, reject) => {
+                try {
+                    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                    console.log('👤 User role from localStorage:', userData.role);
+                    
+                    // ✅ UPDATED: All management roles that can access dashboard
+                    const allowedRoles = [
+                        'Principal',
+                        'Management Staff',
+                        'Deputy Principal',
+                        'Assistant Principal',
+                        'Section Head'
+                    ];
+                    
+                    if (!allowedRoles.includes(userData.role)) {
+                        console.log('❌ Access denied for role:', userData.role);
+                        alert('Access denied. This dashboard is only for management staff.\n\nYour role: ' + userData.role);
+                        window.location.href = 'profile.html';
+                        reject(new Error('Unauthorized role'));
+                        return;
+                    }
+                    
+                    console.log('✅ Authorization check passed for role:', userData.role);
+                    resolve(true);
+                } catch (error) {
+                    console.error('❌ Authorization check error:', error);
+                    window.location.href = 'login.html';
+                    reject(error);
+                }
+            });
         }
-    } catch (error) {
-        console.error('Auth check error:', error);
-        window.location.href = 'login.html';
-    }
-}
 
         // Tab switching
         function switchTab(tabName, event) {
@@ -471,23 +496,26 @@ async function checkAuthorization() {
         // Load Dashboard Statistics
         async function loadStatistics() {
             try {
-                console.log('Loading statistics...');
+                console.log('📊 Loading statistics...');
                 const data = await apiCall(API_CONFIG.ENDPOINTS.DASHBOARD_STATS);
                 
-                console.log('Statistics data:', data);
+                console.log('✅ Statistics data:', data);
                 
                 if (data.success && data.stats) {
                     document.getElementById('totalWaste').textContent = data.stats.totalWasteEntries || 0;
                     document.getElementById('totalResources').textContent = data.stats.totalResourceEntries || 0;
                     document.getElementById('totalSpaces').textContent = data.stats.totalSpaceEntries || 0;
                     document.getElementById('totalUsers').textContent = data.stats.totalUsers || 0;
+                } else {
+                    console.warn('Unexpected stats response:', data);
                 }
             } catch (error) {
-                console.error('Error loading statistics:', error);
+                console.error('❌ Error loading statistics:', error);
+                // Don't redirect on stats load error, just log it
             }
         }
 
-        // Load Daily Waste Entries - FIXED
+        // Load Daily Waste Entries
         async function loadWasteEntries() {
             const container = document.getElementById('wasteEntriesContainer');
             container.innerHTML = '<div class="loading">Loading waste entries...</div>';
@@ -534,7 +562,7 @@ async function checkAuthorization() {
             }
         }
 
-        // Load Weekly Resource Entries - FIXED
+        // Load Weekly Resource Entries
         async function loadResourceEntries() {
             const container = document.getElementById('resourceEntriesContainer');
             container.innerHTML = '<div class="loading">Loading resource entries...</div>';
@@ -581,7 +609,7 @@ async function checkAuthorization() {
             }
         }
 
-        // Load Unused Space Entries - FIXED
+        // Load Unused Space Entries
         async function loadSpaceEntries() {
             const container = document.getElementById('spaceEntriesContainer');
             container.innerHTML = '<div class="loading">Loading space entries...</div>';
@@ -807,12 +835,31 @@ async function checkAuthorization() {
             return card;
         }
 
-        // Initialize dashboard
+        // ✅ FIX #3: Proper initialization with await on auth check
         window.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Dashboard loaded');
-            await checkAuthorization();
-            await loadStatistics();
-            await loadWasteEntries(); // Load initial tab
+            console.log('🚀 Dashboard DOMContentLoaded event fired');
+            
+            try {
+                // Show auth status
+                document.getElementById('authStatus').style.display = 'block';
+                
+                // Wait for authorization check to complete
+                await checkAuthorization();
+                
+                // Hide auth status
+                document.getElementById('authStatus').style.display = 'none';
+                
+                // Load statistics
+                await loadStatistics();
+                
+                // Load initial tab (waste entries)
+                await loadWasteEntries();
+                
+                console.log('✅ Dashboard fully initialized');
+            } catch (error) {
+                console.error('❌ Dashboard initialization error:', error);
+                // The checkAuthorization function handles redirects
+            }
         });
 
         // Navbar scroll behavior
