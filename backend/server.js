@@ -767,67 +767,7 @@ app.get('/api/resources/weekly', authenticateToken, async (req, res) => {
 // ===================== UNUSED SPACE ROUTES =====================
 
 // Submit Unused Space Entry
-app.post('/api/spaces/unused', authenticateToken, upload.array('photos', 10), async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
-        
-        // Workers cannot submit space entries
-        if (user.role === 'Worker') {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Workers are not allowed to submit space entries' 
-            });
-        }
-
-        const photos = req.files ? req.files.map(file => file.path) : [];
-
-        const spaceEntry = new UnusedSpace({
-            submittedBy: req.user.userId,
-            submittedByName: user.fullName,
-            submittedRole: user.role,
-            submittedSection: user.section,
-            buildingName: req.body.buildingName,
-            floorNumber: req.body.floorNumber,
-            roomNumber: req.body.roomNumber,
-            nearLocation: req.body.nearLocation,
-            specificLocation: req.body.specificLocation,
-            spaceType: req.body.spaceType,
-            otherSpaceType: req.body.otherSpaceType,
-            spaceSize: req.body.spaceSize,
-            estimatedLength: req.body.estimatedLength,
-            estimatedWidth: req.body.estimatedWidth,
-            currentUsage: req.body.currentUsage,
-            usageDescription: req.body.usageDescription,
-            lastUsedDate: req.body.lastUsedDate,
-            spaceCondition: req.body.spaceCondition,
-            spaceIssues: req.body.spaceIssues ? JSON.parse(req.body.spaceIssues) : [],
-            conditionDetails: req.body.conditionDetails,
-            facilities: req.body.facilities ? JSON.parse(req.body.facilities) : [],
-            facilitiesNotes: req.body.facilitiesNotes,
-            potentialUses: req.body.potentialUses ? JSON.parse(req.body.potentialUses) : [],
-            suggestionDetails: req.body.suggestionDetails,
-            priority: req.body.priority,
-            cleaningNeeds: req.body.cleaningNeeds,
-            repairNeeds: req.body.repairNeeds,
-            furnitureNeeds: req.body.furnitureNeeds,
-            estimatedBudget: req.body.estimatedBudget,
-            additionalNotes: req.body.additionalNotes,
-            contactPerson: req.body.contactPerson,
-            photos
-        });
-
-        await spaceEntry.save();
-
-        res.status(201).json({ 
-            success: true, 
-            message: 'Space entry submitted successfully',
-            entry: spaceEntry
-        });
-    } catch (error) {
-        console.error('Submit space entry error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
+https://github.com/OmithDamsilu/school-management-system/blob/main/frontend/js/unused-space-entry.js
 
 // Get All Unused Space Entries
 // ✅ UPDATED: Submit Unused Space Entry (supports both Cloudinary & Base64)
