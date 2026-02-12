@@ -75,7 +75,7 @@ const userSchema = new mongoose.Schema({
     role: { 
         type: String, 
         required: true,
-        enum: ['Principal', 'Management Staff', 'Non-Academic Staff', 'Class Teacher', 'Section Head', 'Worker']
+        enum: ['Principal', 'Management Staff', 'Deputy Principal', 'Assistant Principal', 'Non-Academic Staff', 'Class Teacher', 'Section Head', 'Worker']
     },
     section: { type: String },
     grade: { type: String },
