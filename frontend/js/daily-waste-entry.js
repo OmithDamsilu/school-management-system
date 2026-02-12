@@ -569,7 +569,7 @@ function loadDraftIfExists() {
 // Handle cancel
 function handleCancel() {
     if (confirm('Discard this entry and return to dashboard?')) {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'profile.html';
     }
 }
 
