@@ -42,6 +42,17 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ ADD THIS NEW CODE HERE (between the lines above and below):
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.set('ETag', '');
+    }
+    next();
+});
+
 // Cloudinary Configuration
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
