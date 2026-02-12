@@ -5,8 +5,6 @@
 
 // Configuration
 const API_URL = 'https://school-management-system-wico.onrender.com';
-const CLOUDINARY_CLOUD_NAME = 'dsrshx2gz';
-const CLOUDINARY_UPLOAD_PRESET = 'echotrack_unused_space';
 
 // Photo Upload State
 let uploadedPhotos = [];
@@ -139,6 +137,7 @@ function handleFiles(files) {
 
 // FIXED: Upload to Cloudinary instead of base64
 // ✅ REPLACE: Upload to Base64 instead of Cloudinary
+// Upload photo as Base64 to MongoDB (like daily waste entry)
 async function uploadToCloudinary(file) {
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
@@ -188,6 +187,7 @@ async function uploadToCloudinary(file) {
 }
 
 // ✅ ADD: Image compression function
+// Image compression function
 function compressImage(file, maxWidth = 1200, quality = 0.7) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -227,8 +227,8 @@ function compressImage(file, maxWidth = 1200, quality = 0.7) {
         reader.readAsDataURL(file);
     });
 }
-
 // ✅ UPDATED: Display Base64 photo
+// Display Base64 photo
 function displayPhoto(photoData) {
     const photoPreview = document.getElementById('photoPreview');
     
@@ -237,7 +237,7 @@ function displayPhoto(photoData) {
     previewItem.dataset.photoIndex = uploadedPhotos.length - 1;
 
     const img = document.createElement('img');
-    img.src = photoData.data; // ✅ Use Base64 data
+    img.src = photoData.data;  // ← Important: uses Base64 data
     img.alt = photoData.originalName;
 
     const removeBtn = document.createElement('button');
@@ -269,15 +269,28 @@ function refreshPhotoPreview() {
     });
 }
 
-function removePhoto(photoId) {
-    uploadedPhotos = uploadedPhotos.filter(photo => photo.publicId !== photoId);
-    
-    const previewItem = document.querySelector(`[data-photo-id="${photoId}"]`);
-    if (previewItem) {
-        previewItem.remove();
-    }
-    
-    updatePhotoCount();
+function refreshPhotoPreview() {
+    const photoPreview = document.getElementById('photoPreview');
+    photoPreview.innerHTML = '';
+    uploadedPhotos.forEach((photo, idx) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        previewItem.dataset.photoIndex = idx;
+
+        const img = document.createElement('img');
+        img.src = photo.data;
+        img.alt = photo.originalName;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-photo';
+        removeBtn.innerHTML = '×';
+        removeBtn.type = 'button';
+        removeBtn.onclick = () => removePhoto(idx);
+
+        previewItem.appendChild(img);
+        previewItem.appendChild(removeBtn);
+        photoPreview.appendChild(previewItem);
+    });
 }
 
 // FIXED: Use CSS classes instead of inline styles
