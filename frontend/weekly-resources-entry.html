@@ -229,7 +229,18 @@
             transition: all 0.3s ease;
             margin: 20px 0;
             position: relative;
+            pointer-events: auto;
         }
+
+/* ✅ ADD THIS NEW RULE: */
+.photo-upload-section > * {
+    pointer-events: none;
+}
+
+/* ✅ ADD THIS TO KEEP THE BADGE CLICKABLE: */
+.photo-count {
+    pointer-events: auto;
+}
 
         .photo-upload-section:hover {
             border-color: #114814;
