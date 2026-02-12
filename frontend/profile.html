@@ -232,9 +232,9 @@ async function loadProfile() {
                 }
             }
         }
-        // Principals and Management Staff see dashboard instead of entry forms
-        else if (role === 'Principal' || role === 'Management Staff') {
-            console.log('User is Management - showing dashboard');
+        // Principals, Management Staff, Deputy Principal, Assistant Principal, and Section Head see dashboard instead of entry forms
+        else if (role === 'Principal' || role === 'Management Staff' || role === 'Deputy Principal' || role === 'Assistant Principal' || role === 'Section Head') {
+            console.log('User is Management/Leadership - showing dashboard');
             if (entryFormsSection) entryFormsSection.style.display = 'none';
             if (managementSection) managementSection.style.display = 'block';
             if (dashboardLink) dashboardLink.style.display = 'block';
