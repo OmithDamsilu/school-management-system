@@ -4,23 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Echo Track Schoolcore is a smart web platform for managing school waste, resources, and unused spaces to create a cleaner and more sustainable learning environment.">
-    <meta property="og:title" content="Echo Track Schoolcore - Digitally manage waste, space & resources">
-    <meta property="og:description" content="EchoTrack Schoolcore is a smart web-based platform that helps schools track waste, manage resources, and optimize unused spaces to create cleaner, safer, and more sustainable learning environments.">
-    <meta property="og:type" content="website">
-
-    <link rel="stylesheet" href="css/common.css">
-    
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="images/web logo.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/web logo.png">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
-    
     <title>Dashboard | Echo Track Schoolcore</title>
+    
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="icon" type="image/png" href="images/web logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -210,6 +198,152 @@
             font-size: 14px;
         }
 
+        /* ✅ NEW: Photo Gallery Styles */
+        .photo-gallery {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+        }
+
+        .gallery-title {
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .photo-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid #21a300;
+            transition: all 0.3s ease;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-thumbnail:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(33, 163, 0, 0.3);
+        }
+
+        .photo-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-placeholder {
+            color: #999;
+            font-size: 12px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        /* ✅ NEW: Modal/Lightbox Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .modal-info {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            background: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #21a300;
+            color: white;
+        }
+
+        .modal-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal-nav button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #21a300;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .modal-nav button:hover {
+            background: #1a8000;
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -255,34 +389,6 @@
             transform: translateY(-2px);
         }
 
-        .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #c33;
-            margin-bottom: 20px;
-        }
-
-        .debug-info {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            color: #666;
-            margin-top: 10px;
-            font-family: monospace;
-        }
-
-        .auth-check {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            color: #666;
-            text-align: center;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .dashboard-container {
@@ -306,6 +412,24 @@
                 flex-direction: column;
                 gap: 5px;
             }
+
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+
+            .photo-thumbnail {
+                width: 60px;
+                height: 60px;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                padding: 15px;
+            }
+
+            .modal-image {
+                max-height: 60vh;
+            }
         }
     </style>
 </head>
@@ -314,8 +438,6 @@
     <!-- Navigation -->
     <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
-            
-            <!-- Logo Section -->
             <div class="logo-section">
                 <div class="logo">
                     <a href="index.html">
@@ -324,7 +446,6 @@
                 </div>
             </div>
 
-            <!-- Navigation Links -->
             <div class="nav-center">
                 <ul class="nav-links">
                     <li><a href="profile.html">Home</a></li>
@@ -332,11 +453,9 @@
                 </ul>
             </div>
 
-            <!-- Buttons -->
             <div class="nav-buttons">
                 <button onclick="logout()" class="btn btn-primary">Logout</button>
             </div>
-
         </div>
     </nav>
 
@@ -345,11 +464,6 @@
         <div class="dashboard-header">
             <h1>📊 Management Dashboard</h1>
             <p>View and monitor all submitted data</p>
-        </div>
-
-        <!-- Auth Status -->
-        <div id="authStatus" class="auth-check" style="display: none;">
-            Checking authorization... Please wait.
         </div>
 
         <!-- Statistics Cards -->
@@ -416,6 +530,19 @@
         </div>
     </main>
 
+    <!-- ✅ NEW: Photo Lightbox Modal -->
+    <div id="photoModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePhotoModal()">&times;</button>
+            <div id="photoModalImage"></div>
+            <div id="photoModalInfo" class="modal-info"></div>
+            <div class="modal-nav">
+                <button onclick="previousPhoto()" id="prevBtn">← Previous</button>
+                <button onclick="nextPhoto()" id="nextBtn">Next →</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer>
         <div class="footer-content">
@@ -427,22 +554,23 @@
 
     <script src="js/config.js"></script>
     <script>
-        // ✅ FIX #1: Check authentication FIRST
+        // ✅ NEW: Photo Modal Variables
+        let currentPhotos = [];
+        let currentPhotoIndex = 0;
+
+        // Check authentication
         if (!isAuthenticated()) {
             console.log('❌ Not authenticated, redirecting to login...');
             window.location.href = 'login.html';
-        } else {
-            console.log('✅ User is authenticated');
         }
 
-        // ✅ FIX #2: Proper authorization check with all allowed roles
+        // Check authorization
         async function checkAuthorization() {
             return new Promise((resolve, reject) => {
                 try {
                     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                    console.log('👤 User role from localStorage:', userData.role);
+                    console.log('👤 User role:', userData.role);
                     
-                    // ✅ UPDATED: All management roles that can access dashboard
                     const allowedRoles = [
                         'Principal',
                         'Management Staff',
@@ -453,13 +581,13 @@
                     
                     if (!allowedRoles.includes(userData.role)) {
                         console.log('❌ Access denied for role:', userData.role);
-                        alert('Access denied. This dashboard is only for management staff.\n\nYour role: ' + userData.role);
+                        alert('Access denied. This dashboard is only for management staff.');
                         window.location.href = 'profile.html';
                         reject(new Error('Unauthorized role'));
                         return;
                     }
                     
-                    console.log('✅ Authorization check passed for role:', userData.role);
+                    console.log('✅ Authorization passed');
                     resolve(true);
                 } catch (error) {
                     console.error('❌ Authorization check error:', error);
@@ -473,7 +601,6 @@
         function switchTab(tabName, event) {
             console.log('Switching to tab:', tabName);
             
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -481,13 +608,11 @@
                 btn.classList.remove('active');
             });
 
-            // Show selected tab
             document.getElementById(`${tabName}-tab`).classList.add('active');
             if (event && event.target) {
                 event.target.classList.add('active');
             }
 
-            // Load data for the selected tab
             if (tabName === 'waste') loadWasteEntries();
             if (tabName === 'resources') loadResourceEntries();
             if (tabName === 'spaces') loadSpaceEntries();
@@ -499,19 +624,14 @@
                 console.log('📊 Loading statistics...');
                 const data = await apiCall(API_CONFIG.ENDPOINTS.DASHBOARD_STATS);
                 
-                console.log('✅ Statistics data:', data);
-                
                 if (data.success && data.stats) {
                     document.getElementById('totalWaste').textContent = data.stats.totalWasteEntries || 0;
                     document.getElementById('totalResources').textContent = data.stats.totalResourceEntries || 0;
                     document.getElementById('totalSpaces').textContent = data.stats.totalSpaceEntries || 0;
                     document.getElementById('totalUsers').textContent = data.stats.totalUsers || 0;
-                } else {
-                    console.warn('Unexpected stats response:', data);
                 }
             } catch (error) {
                 console.error('❌ Error loading statistics:', error);
-                // Don't redirect on stats load error, just log it
             }
         }
 
@@ -521,23 +641,17 @@
             container.innerHTML = '<div class="loading">Loading waste entries...</div>';
 
             try {
-                console.log('📥 Loading waste entries from /api/waste/daily');
                 const response = await apiCall('/api/waste/daily');
                 
-                console.log('✅ Waste entries response:', response);
-                
                 if (response.success && response.entries && response.entries.length > 0) {
-                    console.log('Found', response.entries.length, 'waste entries');
                     container.innerHTML = '<div class="entries-grid"></div>';
                     const grid = container.querySelector('.entries-grid');
                     
-                    response.entries.forEach((entry, index) => {
-                        console.log(`Processing waste entry ${index + 1}:`, entry);
+                    response.entries.forEach((entry) => {
                         const card = createWasteCard(entry);
                         grid.appendChild(card);
                     });
                 } else {
-                    console.log('No waste entries found');
                     container.innerHTML = `
                         <div class="no-data">
                             <div class="no-data-icon">🗑️</div>
@@ -549,14 +663,10 @@
             } catch (error) {
                 console.error('❌ Error loading waste entries:', error);
                 container.innerHTML = `
-                    <div class="error-message">
-                        <strong>Error Loading Data:</strong> ${error.message}
-                    </div>
                     <div class="no-data">
                         <div class="no-data-icon">❌</div>
                         <h3>Failed to Load Waste Entries</h3>
-                        <p>Check the browser console for debugging information.</p>
-                        <div class="debug-info">Error: ${error.message}</div>
+                        <p>${error.message}</p>
                     </div>
                 `;
             }
@@ -568,23 +678,17 @@
             container.innerHTML = '<div class="loading">Loading resource entries...</div>';
 
             try {
-                console.log('📥 Loading resource entries from /api/resources/weekly');
                 const response = await apiCall('/api/resources/weekly');
                 
-                console.log('✅ Resource entries response:', response);
-                
                 if (response.success && response.entries && response.entries.length > 0) {
-                    console.log('Found', response.entries.length, 'resource entries');
                     container.innerHTML = '<div class="entries-grid"></div>';
                     const grid = container.querySelector('.entries-grid');
                     
-                    response.entries.forEach((entry, index) => {
-                        console.log(`Processing resource entry ${index + 1}:`, entry);
+                    response.entries.forEach((entry) => {
                         const card = createResourceCard(entry);
                         grid.appendChild(card);
                     });
                 } else {
-                    console.log('No resource entries found');
                     container.innerHTML = `
                         <div class="no-data">
                             <div class="no-data-icon">📊</div>
@@ -596,14 +700,10 @@
             } catch (error) {
                 console.error('❌ Error loading resource entries:', error);
                 container.innerHTML = `
-                    <div class="error-message">
-                        <strong>Error Loading Data:</strong> ${error.message}
-                    </div>
                     <div class="no-data">
                         <div class="no-data-icon">❌</div>
                         <h3>Failed to Load Resource Entries</h3>
-                        <p>Check the browser console for debugging information.</p>
-                        <div class="debug-info">Error: ${error.message}</div>
+                        <p>${error.message}</p>
                     </div>
                 `;
             }
@@ -615,23 +715,17 @@
             container.innerHTML = '<div class="loading">Loading space entries...</div>';
 
             try {
-                console.log('📥 Loading space entries from /api/spaces/unused');
                 const response = await apiCall('/api/spaces/unused');
                 
-                console.log('✅ Space entries response:', response);
-                
                 if (response.success && response.entries && response.entries.length > 0) {
-                    console.log('Found', response.entries.length, 'space entries');
                     container.innerHTML = '<div class="entries-grid"></div>';
                     const grid = container.querySelector('.entries-grid');
                     
-                    response.entries.forEach((entry, index) => {
-                        console.log(`Processing space entry ${index + 1}:`, entry);
+                    response.entries.forEach((entry) => {
                         const card = createSpaceCard(entry);
                         grid.appendChild(card);
                     });
                 } else {
-                    console.log('No space entries found');
                     container.innerHTML = `
                         <div class="no-data">
                             <div class="no-data-icon">🏢</div>
@@ -643,18 +737,106 @@
             } catch (error) {
                 console.error('❌ Error loading space entries:', error);
                 container.innerHTML = `
-                    <div class="error-message">
-                        <strong>Error Loading Data:</strong> ${error.message}
-                    </div>
                     <div class="no-data">
                         <div class="no-data-icon">❌</div>
                         <h3>Failed to Load Space Entries</h3>
-                        <p>Check the browser console for debugging information.</p>
-                        <div class="debug-info">Error: ${error.message}</div>
+                        <p>${error.message}</p>
                     </div>
                 `;
             }
         }
+
+        // ✅ NEW: Photo Display Functionality
+        function displayPhotos(photos, entryTitle) {
+            if (!photos || photos.length === 0) {
+                return '<div class="photo-placeholder">No photos</div>';
+            }
+
+            let html = `<div class="photo-gallery">
+                <div class="gallery-title">📷 Photos (${photos.length})</div>
+                <div class="photo-grid">`;
+
+            photos.forEach((photo, index) => {
+                // Handle both Base64 and Cloudinary formats
+                let photoSrc = '';
+                
+                if (photo.data) {
+                    // Base64 format
+                    photoSrc = photo.data.startsWith('data:') 
+                        ? photo.data 
+                        : `data:${photo.mimeType || 'image/jpeg'};base64,${photo.data}`;
+                } else if (photo.url) {
+                    // Cloudinary format
+                    photoSrc = photo.url;
+                }
+
+                html += `<div class="photo-thumbnail" onclick="openPhotoModal(${JSON.stringify(photos).replace(/"/g, '&quot;')}, ${index}, '${entryTitle}')">
+                    <img src="${photoSrc}" alt="Photo ${index + 1}" onerror="this.parentElement.innerHTML='<div class=&quot;photo-placeholder&quot;>Failed to load</div>'">
+                </div>`;
+            });
+
+            html += '</div></div>';
+            return html;
+        }
+
+        // ✅ NEW: Photo Modal Functions
+        function openPhotoModal(photos, index, title) {
+            currentPhotos = photos;
+            currentPhotoIndex = index;
+            showPhotoModal(title);
+        }
+
+        function showPhotoModal(title) {
+            const modal = document.getElementById('photoModal');
+            const photo = currentPhotos[currentPhotoIndex];
+            
+            let photoSrc = '';
+            if (photo.data) {
+                photoSrc = photo.data.startsWith('data:') 
+                    ? photo.data 
+                    : `data:${photo.mimeType || 'image/jpeg'};base64,${photo.data}`;
+            } else if (photo.url) {
+                photoSrc = photo.url;
+            }
+
+            const imageHtml = `<img src="${photoSrc}" class="modal-image" alt="Photo">`;
+            const infoHtml = `<p>${title} - Photo ${currentPhotoIndex + 1} of ${currentPhotos.length}</p>`;
+            
+            document.getElementById('photoModalImage').innerHTML = imageHtml;
+            document.getElementById('photoModalInfo').innerHTML = infoHtml;
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentPhotoIndex === 0;
+            document.getElementById('nextBtn').disabled = currentPhotoIndex === currentPhotos.length - 1;
+            
+            modal.classList.add('active');
+        }
+
+        function closePhotoModal() {
+            document.getElementById('photoModal').classList.remove('active');
+        }
+
+        function previousPhoto() {
+            if (currentPhotoIndex > 0) {
+                currentPhotoIndex--;
+                showPhotoModal('Photo');
+            }
+        }
+
+        function nextPhoto() {
+            if (currentPhotoIndex < currentPhotos.length - 1) {
+                currentPhotoIndex++;
+                showPhotoModal('Photo');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('photoModal');
+            if (event.target === modal) {
+                closePhotoModal();
+            }
+        });
 
         // Create Waste Entry Card
         function createWasteCard(entry) {
@@ -703,11 +885,8 @@
                             <span class="detail-value">${entry.additionalNotes}</span>
                         </div>
                     ` : ''}
-                    <div class="entry-detail-row">
-                        <span class="detail-label">Photos:</span>
-                        <span class="detail-value">${entry.photos?.length || 0} attached</span>
-                    </div>
                 </div>
+                ${displayPhotos(entry.photos, `Daily Waste - ${entry.submittedByName}`)}
             `;
             
             return card;
@@ -760,11 +939,8 @@
                             <span class="detail-value">${entry.notes}</span>
                         </div>
                     ` : ''}
-                    <div class="entry-detail-row">
-                        <span class="detail-label">Photos:</span>
-                        <span class="detail-value">${entry.photos?.length || 0} attached</span>
-                    </div>
                 </div>
+                ${displayPhotos(entry.photos, `Weekly Resources - ${entry.submittedByName}`)}
             `;
             
             return card;
@@ -825,40 +1001,22 @@
                             <span class="detail-value">${entry.suggestionDetails}</span>
                         </div>
                     ` : ''}
-                    <div class="entry-detail-row">
-                        <span class="detail-label">Photos:</span>
-                        <span class="detail-value">${entry.photos?.length || 0} attached</span>
-                    </div>
                 </div>
+                ${displayPhotos(entry.photos, `Unused Space - ${entry.submittedByName}`)}
             `;
             
             return card;
         }
 
-        // ✅ FIX #3: Proper initialization with await on auth check
+        // Initialize dashboard
         window.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Dashboard DOMContentLoaded event fired');
-            
+            console.log('🚀 Dashboard loaded');
             try {
-                // Show auth status
-                document.getElementById('authStatus').style.display = 'block';
-                
-                // Wait for authorization check to complete
                 await checkAuthorization();
-                
-                // Hide auth status
-                document.getElementById('authStatus').style.display = 'none';
-                
-                // Load statistics
                 await loadStatistics();
-                
-                // Load initial tab (waste entries)
                 await loadWasteEntries();
-                
-                console.log('✅ Dashboard fully initialized');
             } catch (error) {
                 console.error('❌ Dashboard initialization error:', error);
-                // The checkAuthorization function handles redirects
             }
         });
 
