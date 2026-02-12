@@ -75,7 +75,7 @@ const userSchema = new mongoose.Schema({
     role: { 
         type: String, 
         required: true,
-        enum: ['Principal', 'Management Staff','Deputy Principal','Assistant Principal''Non-Academic Staff', 'Class Teacher', 'Section Head', 'Worker']
+        enum: ['Principal', 'Management Staff', 'Non-Academic Staff', 'Class Teacher', 'Section Head', 'Worker']
     },
     section: { type: String },
     grade: { type: String },
@@ -744,7 +744,16 @@ app.post('/api/resources/weekly', authenticateToken, async (req, res) => {
 // Get All Resources Entries
 app.get('/api/resources/weekly', authenticateToken, async (req, res) => {
     try {
+        console.log('📥 Getting weekly resources entries');
+        
         const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
         
         let query = {};
         
@@ -754,10 +763,17 @@ app.get('/api/resources/weekly', authenticateToken, async (req, res) => {
         }
 
         const entries = await WeeklyResources.find(query)
-            .sort({ weekStartDate: -1 })
-            .limit(100);
+            .sort({ weekEnding: -1, createdAt: -1 })
+            .limit(100)
+            .lean();
 
-        res.json({ success: true, entries });
+        console.log('✅ Found', entries.length, 'resource entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
     } catch (error) {
         console.error('Get resources entries error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -948,6 +964,92 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Get dashboard stats error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// ===================== GET DAILY WASTE ENTRIES =====================
+// Add this AFTER the POST /api/waste/daily route
+app.get('/api/waste/daily', authenticateToken, async (req, res) => {
+    try {
+        console.log('📥 Getting daily waste entries');
+        
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+        
+        let query = {};
+        
+        // If not Principal or Management Staff, only show their own entries
+        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
+            query.submittedBy = req.user.userId;
+        }
+
+        const entries = await DailyWaste.find(query)
+            .sort({ date: -1, createdAt: -1 })
+            .limit(100)
+            .lean();
+
+        console.log('✅ Found', entries.length, 'waste entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
+    } catch (error) {
+        console.error('Get waste entries error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        });
+    }
+});
+
+// ===================== GET UNUSED SPACE ENTRIES =====================
+// Add this AFTER the POST /api/spaces/unused route
+app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
+    try {
+        console.log('📥 Getting unused space entries');
+        
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+        
+        let query = {};
+        
+        // If not Principal or Management Staff, only show their own entries
+        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
+            query.submittedBy = req.user.userId;
+        }
+
+        const entries = await UnusedSpace.find(query)
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .lean();
+
+        console.log('✅ Found', entries.length, 'space entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
+    } catch (error) {
+        console.error('Get space entries error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        });
     }
 });
 
