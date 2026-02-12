@@ -251,15 +251,6 @@ function displayPhoto(photoData) {
     photoPreview.appendChild(previewItem);
 }
 
-// ✅ UPDATED: Remove photo by index
-function removePhoto(index) {
-    if (confirm('Remove this photo?')) {
-        uploadedPhotos.splice(index, 1);
-        refreshPhotoPreview();
-        updatePhotoCount();
-    }
-}
-
 // ✅ ADD: Refresh preview
 function refreshPhotoPreview() {
     const photoPreview = document.getElementById('photoPreview');
