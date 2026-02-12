@@ -1,6 +1,6 @@
 /**
- * Unused Space Entry - JavaScript with Cloudinary Integration
- * FIXED: Proper API integration, consistent user handling, and photo upload
+ * Unused Space Entry - JavaScript with Base64 Photo Storage to MongoDB
+ * FIXED: Proper Base64 upload matching daily-waste.js pattern
  */
 
 // Configuration
@@ -34,7 +34,7 @@ function initializeForm() {
     dateElement.textContent = formattedDate;
 }
 
-// FIXED: Consistent user data loading
+// Load user information
 function loadUserInfo() {
     // Try both possible storage keys for compatibility
     let user = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -67,7 +67,7 @@ function getRoleDisplay(role) {
     return roleMap[role] || role;
 }
 
-// FIXED: Photo Upload with Cloudinary Integration
+// Photo Upload Setup
 function setupPhotoUpload() {
     const photoUploadArea = document.getElementById('photoUploadArea');
     const photoInput = document.getElementById('photoInput');
@@ -131,62 +131,10 @@ function handleFiles(files) {
         return;
     }
 
-    // Upload each file to Cloudinary
-    validFiles.forEach(file => uploadToCloudinary(file));
+    // Upload each file to Base64
+    validFiles.forEach(file => convertToBase64(file));
 }
 
-// FIXED: Upload to Cloudinary instead of base64
-// ✅ REPLACE: Upload to Base64 instead of Cloudinary
-// Upload photo as Base64 to MongoDB (like daily waste entry)
-async function uploadToCloudinary(file) {
-    const progressContainer = document.getElementById('uploadProgress');
-    const progressBar = document.getElementById('progressBar');
-    progressContainer.classList.add('active');
-
-    try {
-        console.log(`📸 Processing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
-        
-        // Compress image
-        const compressedBlob = await compressImage(file);
-        console.log(`✅ Compressed to ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
-        
-        // Convert to Base64
-        const base64String = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(compressedBlob);
-        });
-
-        const photoData = {
-            data: base64String,
-            originalName: file.name,
-            mimeType: file.type,
-            size: compressedBlob.size,
-            uploadedAt: new Date().toISOString()
-        };
-
-        uploadedPhotos.push(photoData);
-        displayPhoto(photoData);
-        updatePhotoCount();
-
-        const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
-        progressBar.style.width = progress + '%';
-        progressBar.textContent = progress + '%';
-
-    } catch (error) {
-        console.error('Upload error:', error);
-        alert(`Failed to process ${file.name}: ${error.message}`);
-    } finally {
-        setTimeout(() => {
-            if (uploadedPhotos.length === 0) {
-                progressContainer.classList.remove('active');
-            }
-        }, 1000);
-    }
-}
-
-// ✅ ADD: Image compression function
 // Image compression function
 function compressImage(file, maxWidth = 1200, quality = 0.7) {
     return new Promise((resolve, reject) => {
@@ -227,64 +175,103 @@ function compressImage(file, maxWidth = 1200, quality = 0.7) {
         reader.readAsDataURL(file);
     });
 }
-// ✅ UPDATED: Display Base64 photo
-// Display Base64 photo
-function displayPhoto(photoData) {
+
+// Convert photo to Base64 (matching daily-waste.js pattern)
+async function convertToBase64(file) {
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    progressContainer.classList.add('active');
+
+    try {
+        console.log(`📸 Processing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
+        
+        // Compress image
+        const compressedBlob = await compressImage(file);
+        console.log(`✅ Compressed to ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
+        
+        // Convert to Base64
+        const base64String = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(compressedBlob);
+        });
+
+        const photoData = {
+            data: base64String,
+            originalName: file.name,
+            mimeType: file.type,
+            size: compressedBlob.size,
+            uploadedAt: new Date().toISOString()
+        };
+
+        uploadedPhotos.push(photoData);
+        displayPhoto(photoData, uploadedPhotos.length - 1);
+        updatePhotoCount();
+
+        const progress = Math.round((uploadedPhotos.length / MAX_PHOTOS) * 100);
+        progressBar.style.width = progress + '%';
+        progressBar.textContent = progress + '%';
+
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert(`Failed to process ${file.name}: ${error.message}`);
+    } finally {
+        setTimeout(() => {
+            if (uploadedPhotos.length === 0) {
+                progressContainer.classList.remove('active');
+            }
+        }, 1000);
+    }
+}
+
+// Display photo preview
+function displayPhoto(photoData, index) {
     const photoPreview = document.getElementById('photoPreview');
     
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
-    previewItem.dataset.photoIndex = uploadedPhotos.length - 1;
+    previewItem.dataset.photoIndex = index;
 
     const img = document.createElement('img');
-    img.src = photoData.data;  // ← Important: uses Base64 data
+    img.src = photoData.data;  // Uses Base64 data
     img.alt = photoData.originalName;
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-photo';
     removeBtn.innerHTML = '×';
     removeBtn.type = 'button';
-    removeBtn.onclick = () => removePhoto(uploadedPhotos.length - 1);
+    removeBtn.onclick = () => removePhoto(index);
+
+    const photoInfo = document.createElement('div');
+    photoInfo.className = 'photo-info';
+    photoInfo.textContent = photoData.originalName;
 
     previewItem.appendChild(img);
     previewItem.appendChild(removeBtn);
+    previewItem.appendChild(photoInfo);
     photoPreview.appendChild(previewItem);
 }
 
-// ✅ ADD: Refresh preview
-function refreshPhotoPreview() {
-    const photoPreview = document.getElementById('photoPreview');
-    photoPreview.innerHTML = '';
-    uploadedPhotos.forEach((photo) => {
-        displayPhoto(photo);
-    });
+// Remove photo
+function removePhoto(index) {
+    if (confirm('Remove this photo?')) {
+        uploadedPhotos.splice(index, 1);
+        refreshPhotoPreview();
+        updatePhotoCount();
+    }
 }
 
+// Refresh photo preview
 function refreshPhotoPreview() {
     const photoPreview = document.getElementById('photoPreview');
     photoPreview.innerHTML = '';
     uploadedPhotos.forEach((photo, idx) => {
-        const previewItem = document.createElement('div');
-        previewItem.className = 'preview-item';
-        previewItem.dataset.photoIndex = idx;
-
-        const img = document.createElement('img');
-        img.src = photo.data;
-        img.alt = photo.originalName;
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-photo';
-        removeBtn.innerHTML = '×';
-        removeBtn.type = 'button';
-        removeBtn.onclick = () => removePhoto(idx);
-
-        previewItem.appendChild(img);
-        previewItem.appendChild(removeBtn);
-        photoPreview.appendChild(previewItem);
+        displayPhoto(photo, idx);
     });
 }
 
-// FIXED: Use CSS classes instead of inline styles
+// Update photo count
 function updatePhotoCount() {
     const photoCount = document.getElementById('photoCount');
     photoCount.textContent = `${uploadedPhotos.length} / ${MAX_PHOTOS} photos`;
@@ -335,7 +322,7 @@ function setupFormHandlers() {
     }
 }
 
-// FIXED: Proper form submission with API integration
+// Handle form submission (FIXED TO MATCH DAILY WASTE PATTERN)
 async function handleSubmit(e) {
     e.preventDefault();
 
@@ -362,9 +349,17 @@ async function handleSubmit(e) {
     showLoadingOverlay();
 
     try {
-        // FIXED: Actual API submission
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/spaces/unused`, {
+        
+        console.log('📤 Submitting to:', `${API_URL}/api/spaces/unused`);
+        console.log('📊 Payload summary:', {
+            buildingName: formData.buildingName,
+            spaceType: formData.spaceType,
+            photosCount: formData.photos.length,
+            photoSizes: formData.photos.map(p => `${(p.size / 1024).toFixed(1)}KB`)
+        });
+        
+        const response = await fetch(`${API_URL}/api/spaces/unused`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -373,7 +368,15 @@ async function handleSubmit(e) {
             body: JSON.stringify(formData)
         });
 
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            console.error('❌ Failed to parse response:', parseError);
+            throw new Error('Invalid server response');
+        }
+        
+        console.log('📥 Server response:', data);
 
         if (response.ok) {
             alert('✅ Unused Space Report Submitted Successfully!\n\nThank you for helping us identify this unused space. Your report will be reviewed by the management team.');
@@ -386,18 +389,34 @@ async function handleSubmit(e) {
             // Redirect to dashboard
             window.location.href = 'dashboard.html';
         } else {
-            throw new Error(data.message || 'Submission failed');
+            throw new Error(data.message || data.error || `Server error (${response.status})`);
         }
 
     } catch (error) {
-        console.error('Submission error:', error);
-        alert('❌ Failed to submit report: ' + error.message);
+        console.error('❌ Submission error:', error);
+        
+        let errorMessage = 'Failed to submit report: ';
+        
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage += 'Cannot reach server. Check your internet connection.';
+        } else if (error.message.includes('413') || error.message.includes('too large')) {
+            errorMessage += 'Files too large. Try fewer or smaller photos.';
+        } else if (error.message.includes('401') || error.message.includes('token')) {
+            errorMessage += 'Session expired. Please login again.';
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        } else {
+            errorMessage += error.message;
+        }
+        
+        alert('❌ ' + errorMessage);
     } finally {
         hideLoadingOverlay();
     }
 }
 
-// FIXED: Proper user data collection
+// Collect form data (MATCHING BACKEND SCHEMA)
 function collectFormData() {
     const form = document.getElementById('unusedSpaceForm');
     const formData = new FormData(form);
@@ -409,11 +428,8 @@ function collectFormData() {
     }
     
     const data = {
-        // User info
-        userId: user._id || user.id,
-        submittedBy: document.getElementById('userName').textContent,
-        submittedRole: document.getElementById('userRole').textContent,
-        submittedSection: document.getElementById('userSection').textContent,
+        // User info (NOT NEEDED - backend gets from token)
+        // userId: user._id || user.id,
         
         // Location Information
         buildingName: formData.get('buildingName'),
@@ -428,13 +444,13 @@ function collectFormData() {
 
         // Size
         spaceSize: formData.get('spaceSize'),
-        estimatedLength: formData.get('estimatedLength'),
-        estimatedWidth: formData.get('estimatedWidth'),
+        estimatedLength: parseFloat(formData.get('estimatedLength')) || undefined,
+        estimatedWidth: parseFloat(formData.get('estimatedWidth')) || undefined,
 
         // Current Usage
         currentUsage: formData.get('currentUsage'),
         usageDescription: formData.get('usageDescription'),
-        lastUsedDate: formData.get('lastUsedDate'),
+        lastUsedDate: formData.get('lastUsedDate') || undefined,
 
         // Condition
         spaceCondition: formData.get('spaceCondition'),
@@ -460,12 +476,8 @@ function collectFormData() {
         additionalNotes: formData.get('additionalNotes'),
         contactPerson: formData.get('contactPerson'),
 
-        // Photos
-        photos: uploadedPhotos,
-
-        // Metadata
-        submittedDate: new Date().toISOString(),
-        status: 'submitted'
+        // Photos (Base64 format)
+        photos: uploadedPhotos
     };
 
     return data;
@@ -483,7 +495,8 @@ function validateForm(formData) {
         { field: 'currentUsage', label: 'Current Usage' },
         { field: 'usageDescription', label: 'Usage Description' },
         { field: 'spaceCondition', label: 'Space Condition' },
-        { field: 'suggestionDetails', label: 'Detailed Suggestions' }
+        { field: 'suggestionDetails', label: 'Detailed Suggestions' },
+        { field: 'priority', label: 'Priority Level' }
     ];
 
     for (let req of requiredFields) {
@@ -523,7 +536,7 @@ function loadDraft() {
             // Load photos
             if (data.photos && data.photos.length > 0) {
                 uploadedPhotos = data.photos;
-                data.photos.forEach(photo => displayPhoto(photo));
+                refreshPhotoPreview();
                 updatePhotoCount();
             }
         }
