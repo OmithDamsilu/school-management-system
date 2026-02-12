@@ -9,7 +9,6 @@
     <meta property="og:type" content="website">
 
     <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/navbar-dropdown.css">
     
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/web logo.png">
@@ -21,7 +20,275 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap" rel="stylesheet">
     
-    <title>Dash Board | Echo Track Schoolcore</title>
+    <title>Dashboard | Echo Track Schoolcore</title>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: 100px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header h1 {
+            color: #114814;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .dashboard-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #21a300;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 25px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .tab-button:hover {
+            background: rgba(33, 163, 0, 0.1);
+        }
+
+        .tab-button.active {
+            background: #21a300;
+            color: white;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Entries Grid */
+        .entries-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .entries-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .entry-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #21a300;
+            transition: transform 0.2s ease;
+        }
+
+        .entry-card:hover {
+            transform: translateX(5px);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .entry-title {
+            font-weight: 600;
+            color: #114814;
+            font-size: 16px;
+        }
+
+        .entry-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .entry-details {
+            display: grid;
+            gap: 10px;
+        }
+
+        .entry-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .entry-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-data-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .no-data h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .no-data p {
+            color: #999;
+        }
+
+        .refresh-btn {
+            background: #21a300;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #1a8000;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #c33;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+                padding-top: 80px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                width: 100%;
+            }
+
+            .entry-detail-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -42,12 +309,88 @@
             <div class="nav-center">
                 <ul class="nav-links">
                     <li><a href="profile.html">Home</a></li>
-                    <li><a href="dashbborard.html" class="active">Dash Board</a></li>
+                    <li><a href="dashborard.html" class="active">Dashboard</a></li>
                 </ul>
+            </div>
+
+            <!-- Buttons -->
+            <div class="nav-buttons">
+                <button onclick="logout()" class="btn btn-primary">Logout</button>
             </div>
 
         </div>
     </nav>
+
+    <main class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>📊 Management Dashboard</h1>
+            <p>View and monitor all submitted data</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">🗑️</div>
+                <div class="number" id="totalWaste">0</div>
+                <div class="label">Daily Waste Entries</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📊</div>
+                <div class="number" id="totalResources">0</div>
+                <div class="label">Weekly Resource Entries</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🏢</div>
+                <div class="number" id="totalSpaces">0</div>
+                <div class="label">Unused Space Reports</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">👥</div>
+                <div class="number" id="totalUsers">0</div>
+                <div class="label">Total Users</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('waste', event)">
+                🗑️ Daily Waste
+            </button>
+            <button class="tab-button" onclick="switchTab('resources', event)">
+                📊 Weekly Resources
+            </button>
+            <button class="tab-button" onclick="switchTab('spaces', event)">
+                🏢 Unused Spaces
+            </button>
+        </div>
+
+        <!-- Tab Contents -->
+        
+        <!-- Daily Waste Tab -->
+        <div id="waste-tab" class="tab-content active">
+            <div class="entries-container">
+                <button class="refresh-btn" onclick="loadWasteEntries()">🔄 Refresh Data</button>
+                <div id="wasteEntriesContainer" class="loading">Loading waste entries...</div>
+            </div>
+        </div>
+
+        <!-- Weekly Resources Tab -->
+        <div id="resources-tab" class="tab-content">
+            <div class="entries-container">
+                <button class="refresh-btn" onclick="loadResourceEntries()">🔄 Refresh Data</button>
+                <div id="resourceEntriesContainer" class="loading">Loading resource entries...</div>
+            </div>
+        </div>
+
+        <!-- Unused Spaces Tab -->
+        <div id="spaces-tab" class="tab-content">
+            <div class="entries-container">
+                <button class="refresh-btn" onclick="loadSpaceEntries()">🔄 Refresh Data</button>
+                <div id="spaceEntriesContainer" class="loading">Loading space entries...</div>
+            </div>
+        </div>
+    </main>
 
     <!-- Footer -->
     <footer>
@@ -58,43 +401,407 @@
         </div>
     </footer>
 
-    <!-- Authentication Navbar Script -->
-    <script src="js/auth-navbar.js"></script>
-
-    <!-- JavaScript for Navbar Hide/Show -->
+    <script src="js/config.js"></script>
     <script>
+        // Check authentication
+        if (!isAuthenticated()) {
+            console.log('Not authenticated, redirecting to login...');
+            window.location.href = 'login.html';
+        }
+
+        // Check if user is authorized (Principal or Management Staff)
+        async function checkAuthorization() {
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                console.log('User role:', userData.role);
+                
+                // Allow Principal, Management Staff, Deputy Principal, and Assistant Principal
+                const allowedRoles = ['Principal', 'Management Staff', 'Deputy Principal', 'Assistant Principal'];
+                
+                if (!allowedRoles.includes(userData.role)) {
+                    alert('Access denied. This page is only for Principal and Management Staff.');
+                    window.location.href = 'profile.html';
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName, event) {
+            console.log('Switching to tab:', tabName);
+            
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            // Load data for the selected tab
+            if (tabName === 'waste') loadWasteEntries();
+            if (tabName === 'resources') loadResourceEntries();
+            if (tabName === 'spaces') loadSpaceEntries();
+        }
+
+        // Load Dashboard Statistics
+        async function loadStatistics() {
+            try {
+                console.log('Loading statistics...');
+                const data = await apiCall(API_CONFIG.ENDPOINTS.DASHBOARD_STATS);
+                
+                console.log('Statistics data:', data);
+                
+                if (data.success && data.stats) {
+                    document.getElementById('totalWaste').textContent = data.stats.totalWasteEntries || 0;
+                    document.getElementById('totalResources').textContent = data.stats.totalResourceEntries || 0;
+                    document.getElementById('totalSpaces').textContent = data.stats.totalSpaceEntries || 0;
+                    document.getElementById('totalUsers').textContent = data.stats.totalUsers || 0;
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Load Daily Waste Entries
+        async function loadWasteEntries() {
+            const container = document.getElementById('wasteEntriesContainer');
+            container.innerHTML = '<div class="loading">Loading waste entries...</div>';
+
+            try {
+                console.log('Loading waste entries...');
+                const response = await apiCall('/api/waste/daily');
+                
+                console.log('Waste entries response:', response);
+                
+                if (response.success && response.entries && response.entries.length > 0) {
+                    container.innerHTML = '<div class="entries-grid"></div>';
+                    const grid = container.querySelector('.entries-grid');
+                    
+                    response.entries.forEach(entry => {
+                        const card = createWasteCard(entry);
+                        grid.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="no-data-icon">🗑️</div>
+                            <h3>No Waste Entries Found</h3>
+                            <p>No daily waste data has been submitted yet.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading waste entries:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error Loading Data:</strong> ${error.message}
+                    </div>
+                    <div class="no-data">
+                        <div class="no-data-icon">❌</div>
+                        <h3>Failed to Load Waste Entries</h3>
+                        <p>Please make sure the backend GET route for /api/waste/daily is implemented.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load Weekly Resource Entries
+        async function loadResourceEntries() {
+            const container = document.getElementById('resourceEntriesContainer');
+            container.innerHTML = '<div class="loading">Loading resource entries...</div>';
+
+            try {
+                console.log('Loading resource entries...');
+                const response = await apiCall(API_CONFIG.ENDPOINTS.RESOURCES_WEEKLY);
+                
+                console.log('Resource entries response:', response);
+                
+                if (response.success && response.entries && response.entries.length > 0) {
+                    container.innerHTML = '<div class="entries-grid"></div>';
+                    const grid = container.querySelector('.entries-grid');
+                    
+                    response.entries.forEach(entry => {
+                        const card = createResourceCard(entry);
+                        grid.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="no-data-icon">📊</div>
+                            <h3>No Resource Entries Found</h3>
+                            <p>No weekly resource data has been submitted yet.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading resource entries:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error Loading Data:</strong> ${error.message}
+                    </div>
+                    <div class="no-data">
+                        <div class="no-data-icon">❌</div>
+                        <h3>Failed to Load Resource Entries</h3>
+                        <p>Check the browser console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load Unused Space Entries
+        async function loadSpaceEntries() {
+            const container = document.getElementById('spaceEntriesContainer');
+            container.innerHTML = '<div class="loading">Loading space entries...</div>';
+
+            try {
+                console.log('Loading space entries...');
+                const response = await apiCall('/api/spaces/unused');
+                
+                console.log('Space entries response:', response);
+                
+                if (response.success && response.entries && response.entries.length > 0) {
+                    container.innerHTML = '<div class="entries-grid"></div>';
+                    const grid = container.querySelector('.entries-grid');
+                    
+                    response.entries.forEach(entry => {
+                        const card = createSpaceCard(entry);
+                        grid.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="no-data-icon">🏢</div>
+                            <h3>No Space Reports Found</h3>
+                            <p>No unused space reports have been submitted yet.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading space entries:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error Loading Data:</strong> ${error.message}
+                    </div>
+                    <div class="no-data">
+                        <div class="no-data-icon">❌</div>
+                        <h3>Failed to Load Space Entries</h3>
+                        <p>Please make sure the backend GET route for /api/spaces/unused is implemented.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Create Waste Entry Card
+        function createWasteCard(entry) {
+            const card = document.createElement('div');
+            card.className = 'entry-card';
+            
+            const date = new Date(entry.date).toLocaleDateString();
+            
+            card.innerHTML = `
+                <div class="entry-header">
+                    <span class="entry-title">🗑️ ${entry.submittedByName || 'Unknown'}</span>
+                    <span class="entry-date">${date}</span>
+                </div>
+                <div class="entry-details">
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Section/Grade:</span>
+                        <span class="detail-value">${entry.submittedSection || 'N/A'} ${entry.submittedGrade || ''}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Paper Waste:</span>
+                        <span class="detail-value">${entry.paperWaste || 0} kg</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Plastic Waste:</span>
+                        <span class="detail-value">${entry.plasticWaste || 0} kg</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Food Waste:</span>
+                        <span class="detail-value">${entry.foodWaste || 0} kg</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">General Waste:</span>
+                        <span class="detail-value">${entry.generalWaste || 0} kg</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Properly Segregated:</span>
+                        <span class="detail-value">${entry.wasProperlySegregated ? '✅ Yes' : '❌ No'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Cleanliness:</span>
+                        <span class="detail-value">${entry.classroomCleanliness || 'N/A'}</span>
+                    </div>
+                    ${entry.additionalNotes ? `
+                        <div class="entry-detail-row">
+                            <span class="detail-label">Notes:</span>
+                            <span class="detail-value">${entry.additionalNotes}</span>
+                        </div>
+                    ` : ''}
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Photos:</span>
+                        <span class="detail-value">${entry.photos?.length || 0} attached</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Create Resource Entry Card
+        function createResourceCard(entry) {
+            const card = document.createElement('div');
+            card.className = 'entry-card';
+            
+            const date = entry.weekEnding ? new Date(entry.weekEnding).toLocaleDateString() : 'N/A';
+            
+            card.innerHTML = `
+                <div class="entry-header">
+                    <span class="entry-title">📊 ${entry.submittedByName || 'Unknown'}</span>
+                    <span class="entry-date">Week Ending: ${date}</span>
+                </div>
+                <div class="entry-details">
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Location:</span>
+                        <span class="detail-value">${entry.location || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Specific Area:</span>
+                        <span class="detail-value">${entry.specificArea || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Furniture Items:</span>
+                        <span class="detail-value">${entry.furniture?.length || 0} items</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Equipment Items:</span>
+                        <span class="detail-value">${entry.equipment?.length || 0} items</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Overall Condition:</span>
+                        <span class="detail-value">${entry.overallCondition || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Space Utilization:</span>
+                        <span class="detail-value">${entry.spaceUtilization || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Priority Level:</span>
+                        <span class="detail-value">${entry.priorityLevel || 'N/A'}</span>
+                    </div>
+                    ${entry.notes ? `
+                        <div class="entry-detail-row">
+                            <span class="detail-label">Notes:</span>
+                            <span class="detail-value">${entry.notes}</span>
+                        </div>
+                    ` : ''}
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Photos:</span>
+                        <span class="detail-value">${entry.photos?.length || 0} attached</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Create Space Entry Card
+        function createSpaceCard(entry) {
+            const card = document.createElement('div');
+            card.className = 'entry-card';
+            
+            const date = new Date(entry.createdAt).toLocaleDateString();
+            
+            card.innerHTML = `
+                <div class="entry-header">
+                    <span class="entry-title">🏢 ${entry.submittedByName || 'Unknown'}</span>
+                    <span class="entry-date">${date}</span>
+                </div>
+                <div class="entry-details">
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Building:</span>
+                        <span class="detail-value">${entry.buildingName || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Floor:</span>
+                        <span class="detail-value">${entry.floorNumber || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Room Number:</span>
+                        <span class="detail-value">${entry.roomNumber || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Near Location:</span>
+                        <span class="detail-value">${entry.nearLocation || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Space Type:</span>
+                        <span class="detail-value">${entry.spaceType || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Space Size:</span>
+                        <span class="detail-value">${entry.spaceSize || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Condition:</span>
+                        <span class="detail-value">${entry.spaceCondition || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Priority:</span>
+                        <span class="detail-value">${entry.priority || 'N/A'}</span>
+                    </div>
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Current Usage:</span>
+                        <span class="detail-value">${entry.currentUsage || 'N/A'}</span>
+                    </div>
+                    ${entry.suggestionDetails ? `
+                        <div class="entry-detail-row">
+                            <span class="detail-label">Suggestions:</span>
+                            <span class="detail-value">${entry.suggestionDetails}</span>
+                        </div>
+                    ` : ''}
+                    <div class="entry-detail-row">
+                        <span class="detail-label">Photos:</span>
+                        <span class="detail-value">${entry.photos?.length || 0} attached</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Initialize dashboard
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('Dashboard loaded');
+            await checkAuthorization();
+            await loadStatistics();
+            await loadWasteEntries(); // Load initial tab
+        });
+
+        // Navbar scroll behavior
         const navbar = document.querySelector('.navbar');
         let lastScrollTop = 0;
 
-        // Hide/Show navbar on scroll
         window.addEventListener('scroll', function() {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             
             if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down
                 navbar.classList.add('hidden');
             } else {
-                // Scrolling up
                 navbar.classList.remove('hidden');
             }
             
             lastScrollTop = scrollTop;
         });
     </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cursor = document.createElement('div');
-            cursor.className = 'custom-cursor';
-            document.body.appendChild(cursor);
-
-            document.addEventListener('mousemove', (e) => {
-                cursor.style.left = e.clientX + 'px';
-                cursor.style.top = e.clientY + 'px';
-            });
-        });
-    </script>
-
 </body>
-
-</html>    
+</html>
