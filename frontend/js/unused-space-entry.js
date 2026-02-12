@@ -387,7 +387,7 @@ async function handleSubmit(e) {
             localStorage.removeItem('unusedSpaceAutoSave');
             
             // Redirect to dashboard
-            window.location.href = 'dashboard.html';
+            window.location.href = 'profile.html';
         } else {
             throw new Error(data.message || data.error || `Server error (${response.status})`);
         }
