@@ -1053,51 +1053,6 @@ app.get('/api/waste/daily', authenticateToken, async (req, res) => {
     }
 });
 
-// Get Weekly Resources Entries
-app.get('/api/resources/weekly', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
-        
-        if (!user) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'User not found' 
-            });
-        }
-        
-        let query = {};
-        
-        // ✅ If not management staff, only show their own entries
-        const managementRoles = [
-            'Principal',
-            'Management Staff',
-            'Deputy Principal',
-            'Assistant Principal',
-            'Section Head'
-        ];
-        
-        if (!managementRoles.includes(user.role)) {
-            query.submittedBy = req.user.userId;
-        }
-
-        const entries = await WeeklyResources.find(query)
-            .sort({ weekEnding: -1, createdAt: -1 })
-            .limit(100)
-            .lean();
-
-        console.log('✅ Found', entries.length, 'resource entries');
-
-        res.json({ 
-            success: true, 
-            entries: entries,
-            count: entries.length 
-        });
-    } catch (error) {
-        console.error('Get resources entries error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
-
 // Get Unused Space Entries
 app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
     try {
