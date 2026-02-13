@@ -752,44 +752,6 @@ app.post('/api/resources/weekly', authenticateToken, async (req, res) => {
     }
 });
 
-// Get All Resources Entries
-app.get('/api/resources/weekly', authenticateToken, async (req, res) => {
-    try {
-        console.log('📥 Getting weekly resources entries');
-        
-        const user = await User.findById(req.user.userId);
-        
-        if (!user) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'User not found' 
-            });
-        }
-        
-        let query = {};
-        
-        // If not Principal or Management Staff, only show their own entries
-        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
-            query.submittedBy = req.user.userId;
-        }
-
-        const entries = await WeeklyResources.find(query)
-            .sort({ weekEnding: -1, createdAt: -1 })
-            .limit(100)
-            .lean();
-
-        console.log('✅ Found', entries.length, 'resource entries');
-
-        res.json({ 
-            success: true, 
-            entries: entries,
-            count: entries.length 
-        });
-    } catch (error) {
-        console.error('Get resources entries error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
 
 // ===================== UNUSED SPACE ROUTES =====================
 
@@ -927,10 +889,9 @@ app.post('/api/spaces/unused', authenticateToken, async (req, res) => {
 // ===================== DASHBOARD STATISTICS ROUTES =====================
 
 // Get Dashboard Statistics (for Principal/Management)
+// ===================== GET DASHBOARD STATISTICS =====================
 app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     try {
-        console.log('📊 Dashboard stats request from user:', req.user.userId);
-        
         const user = await User.findById(req.user.userId);
         
         if (!user) {
@@ -940,36 +901,26 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
             });
         }
         
-        console.log('👤 User role:', user.role);
-        
-        // ✅ UPDATED: Include ALL management roles that should access dashboard
         const allowedRoles = [
             'Principal',
             'Management Staff',
             'Deputy Principal',
-            'Assistant Principal',  // ← MUST INCLUDE THIS (was missing!)
-            'Section Head'          // ← MUST INCLUDE THIS (was missing!)
+            'Assistant Principal',
+            'Section Head'
         ];
         
         if (!allowedRoles.includes(user.role)) {
-            console.log('❌ Access denied for role:', user.role);
             return res.status(403).json({ 
                 success: false, 
-                message: `Access denied. Only management staff can access dashboard. Your role: ${user.role}` 
+                message: 'Access denied' 
             });
         }
-        
-        console.log('✅ Access granted for role:', user.role);
 
-        // Get statistics
         const totalUsers = await User.countDocuments();
         const totalWasteEntries = await DailyWaste.countDocuments();
         const totalResourceEntries = await WeeklyResources.countDocuments();
         const totalSpaceEntries = await UnusedSpace.countDocuments();
 
-        console.log('📈 Stats:', { totalUsers, totalWasteEntries, totalResourceEntries, totalSpaceEntries });
-
-        // Get recent entries
         const recentWasteEntries = await DailyWaste.find()
             .sort({ createdAt: -1 })
             .limit(5);
@@ -997,115 +948,14 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Get dashboard stats error:', error);
-        res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+        console.error('Get dashboard stats error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-// ===================== OTHER ENDPOINTS ALSO NEED UPDATES =====================
-// Make sure your GET endpoints for waste, resources, and spaces also allow these roles:
-
-// Get Daily Waste Entries
-app.get('/api/waste/daily', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
-        
-        if (!user) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'User not found' 
-            });
-        }
-        
-        let query = {};
-        
-        // ✅ If not management staff, only show their own entries
-        const managementRoles = [
-            'Principal',
-            'Management Staff',
-            'Deputy Principal',
-            'Assistant Principal',
-            'Section Head'
-        ];
-        
-        if (!managementRoles.includes(user.role)) {
-            query.submittedBy = req.user.userId;
-        }
-
-        const entries = await DailyWaste.find(query)
-            .sort({ date: -1, createdAt: -1 })
-            .limit(100)
-            .lean();
-
-        console.log('✅ Found', entries.length, 'waste entries');
-
-        res.json({ 
-            success: true, 
-            entries: entries,
-            count: entries.length 
-        });
-    } catch (error) {
-        console.error('Get waste entries error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
-        });
-    }
-});
-
-// Get Unused Space Entries
-app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
-        
-        if (!user) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'User not found' 
-            });
-        }
-        
-        let query = {};
-        
-        // ✅ If not management staff, only show their own entries
-        const managementRoles = [
-            'Principal',
-            'Management Staff',
-            'Deputy Principal',
-            'Assistant Principal',
-            'Section Head'
-        ];
-        
-        if (!managementRoles.includes(user.role)) {
-            query.submittedBy = req.user.userId;
-        }
-
-        const entries = await UnusedSpace.find(query)
-            .sort({ createdAt: -1 })
-            .limit(100)
-            .lean();
-
-        console.log('✅ Found', entries.length, 'space entries');
-
-        res.json({ 
-            success: true, 
-            entries: entries,
-            count: entries.length 
-        });
-    } catch (error) {
-        console.error('Get space entries error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
-        });
-    }
-});
 // ===================== GET DAILY WASTE ENTRIES =====================
-// Add this AFTER the POST /api/waste/daily route
 app.get('/api/waste/daily', authenticateToken, async (req, res) => {
     try {
-        console.log('📥 Getting daily waste entries');
-        
         const user = await User.findById(req.user.userId);
         
         if (!user) {
@@ -1117,8 +967,15 @@ app.get('/api/waste/daily', authenticateToken, async (req, res) => {
         
         let query = {};
         
-        // If not Principal or Management Staff, only show their own entries
-        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
+        const managementRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'
+        ];
+        
+        if (!managementRoles.includes(user.role)) {
             query.submittedBy = req.user.userId;
         }
 
@@ -1136,19 +993,13 @@ app.get('/api/waste/daily', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('Get waste entries error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
-        });
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
 // ===================== GET UNUSED SPACE ENTRIES =====================
-// Add this AFTER the POST /api/spaces/unused route
 app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
     try {
-        console.log('📥 Getting unused space entries');
-        
         const user = await User.findById(req.user.userId);
         
         if (!user) {
@@ -1160,8 +1011,15 @@ app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
         
         let query = {};
         
-        // If not Principal or Management Staff, only show their own entries
-        if (user.role !== 'Principal' && user.role !== 'Management Staff') {
+        const managementRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'
+        ];
+        
+        if (!managementRoles.includes(user.role)) {
             query.submittedBy = req.user.userId;
         }
 
@@ -1179,10 +1037,7 @@ app.get('/api/spaces/unused', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('Get space entries error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
-        });
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
@@ -1201,4 +1056,50 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+});
+
+app.get('/api/resources/weekly', authenticateToken, async (req, res) => {
+    try {
+        console.log('📥 Getting weekly resources entries');
+        
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+        
+        let query = {};
+        
+        // If not management staff, only show their own entries
+        const managementRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'
+        ];
+        
+        if (!managementRoles.includes(user.role)) {
+            query.submittedBy = req.user.userId;  // ✅ ADD THIS LINE!
+        }
+
+        const entries = await WeeklyResources.find(query)
+            .sort({ weekEnding: -1, createdAt: -1 })
+            .limit(100)
+            .lean();
+
+        console.log('✅ Found', entries.length, 'resource entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
+    } catch (error) {
+        console.error('Get resources entries error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 });
