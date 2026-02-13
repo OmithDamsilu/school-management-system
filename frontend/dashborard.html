@@ -516,7 +516,14 @@
         <!-- Weekly Resources Tab -->
         <div id="resources-tab" class="tab-content">
             <div class="entries-container">
-                <button class="refresh-btn" onclick="loadResourceEntries()">🔄 Refresh Data</button>
+                <div style="margin-bottom: 15px;">
+                    <button class="refresh-btn" onclick="loadResourceEntries()" style="margin-right: 10px;">
+                        🔄 Refresh Data
+                    </button>
+                    <button class="refresh-btn" onclick="testResourcesLoad()" style="background: #ff9800;">
+                        🧪 Test Load Function
+                    </button>
+                </div>
                 <div id="resourceEntriesContainer" class="loading">Loading resource entries...</div>
             </div>
         </div>
@@ -598,10 +605,11 @@
             });
         }
 
-        // Tab switching
+        // Tab switching - FIXED: Properly loads data when switching tabs
         function switchTab(tabName, event) {
-            console.log('Switching to tab:', tabName);
+            console.log('🔄 Switching to tab:', tabName);
             
+            // Remove active class from all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -609,14 +617,21 @@
                 btn.classList.remove('active');
             });
 
+            // Add active class to selected tab
             document.getElementById(`${tabName}-tab`).classList.add('active');
             if (event && event.target) {
                 event.target.classList.add('active');
             }
 
-            if (tabName === 'waste') loadWasteEntries();
-            if (tabName === 'resources') loadResourceEntries();
-            if (tabName === 'spaces') loadSpaceEntries();
+            // ✅ FIX: Load data for the selected tab
+            console.log('📊 Loading data for tab:', tabName);
+            if (tabName === 'waste') {
+                loadWasteEntries();
+            } else if (tabName === 'resources') {
+                loadResourceEntries();
+            } else if (tabName === 'spaces') {
+                loadSpaceEntries();
+            }
         }
 
         // Load Dashboard Statistics
@@ -673,23 +688,48 @@
             }
         }
 
-        // Load Weekly Resource Entries
+        // Load Weekly Resource Entries - FIXED WITH DETAILED LOGGING
         async function loadResourceEntries() {
+            console.log('🔍 loadResourceEntries() called');
             const container = document.getElementById('resourceEntriesContainer');
+            
+            if (!container) {
+                console.error('❌ Container #resourceEntriesContainer not found!');
+                return;
+            }
+            
+            console.log('✅ Container found:', container);
             container.innerHTML = '<div class="loading">Loading resource entries...</div>';
 
             try {
+                console.log('📡 Calling API: /api/resources/weekly');
                 const response = await apiCall('/api/resources/weekly');
                 
+                console.log('📦 API Response received:', response);
+                console.log('  - success:', response.success);
+                console.log('  - entries:', response.entries);
+                console.log('  - entries length:', response.entries?.length);
+                
                 if (response.success && response.entries && response.entries.length > 0) {
+                    console.log(`✅ Rendering ${response.entries.length} resource entries`);
                     container.innerHTML = '<div class="entries-grid"></div>';
                     const grid = container.querySelector('.entries-grid');
                     
-                    response.entries.forEach((entry) => {
+                    if (!grid) {
+                        console.error('❌ Grid element not created!');
+                        return;
+                    }
+                    
+                    response.entries.forEach((entry, index) => {
+                        console.log(`  Creating card ${index + 1}:`, entry.submittedByName);
                         const card = createResourceCard(entry);
                         grid.appendChild(card);
                     });
+                    
+                    console.log('✅ All resource cards appended to grid');
                 } else {
+                    console.warn('⚠️ No entries to display');
+                    console.warn('  Response:', response);
                     container.innerHTML = `
                         <div class="no-data">
                             <div class="no-data-icon">📊</div>
@@ -700,6 +740,7 @@
                 }
             } catch (error) {
                 console.error('❌ Error loading resource entries:', error);
+                console.error('❌ Error stack:', error.stack);
                 container.innerHTML = `
                     <div class="no-data">
                         <div class="no-data-icon">❌</div>
@@ -707,6 +748,23 @@
                         <p>${error.message}</p>
                     </div>
                 `;
+            }
+        }
+
+        // Test function to verify resources load
+        async function testResourcesLoad() {
+            console.log('🧪 TEST: Manual load test started');
+            console.log('🧪 TEST: Checking if function exists:', typeof loadResourceEntries);
+            console.log('🧪 TEST: Checking container exists:', !!document.getElementById('resourceEntriesContainer'));
+            
+            alert('Check console for detailed logs. About to call loadResourceEntries()...');
+            
+            try {
+                await loadResourceEntries();
+                alert('✅ Load completed! Check console for details.');
+            } catch (error) {
+                alert('❌ Load failed: ' + error.message);
+                console.error('🧪 TEST ERROR:', error);
             }
         }
 
