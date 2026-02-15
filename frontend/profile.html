@@ -86,6 +86,13 @@
                         <a href="daily-waste-entry.html" class="btn btn-primary">Enter Data</a>
                     </div>
 
+                    <div class="form-card" id="outdoorWasteCard" style="display: none;">
+                        <div class="form-icon">🌳</div>
+                        <h3>Outdoor Waste Entry</h3>
+                        <p>Track waste from gardens, playgrounds, corridors</p>
+                        <a href="outdoor-waste-entry.html" class="btn btn-primary">Enter Data</a>
+                    </div>
+
                     <div class="form-card">
                         <div class="form-icon">📊</div>
                         <h3>Weekly Resources</h3>
@@ -211,16 +218,22 @@ async function loadProfile() {
         const managementSection = document.getElementById('managementSection');
         const dashboardLink = document.getElementById('dashboardLink');
         
-        // Workers can only access Resources form
+        // Workers can only access Resources form and Outdoor Waste form
         if (role === 'Worker') {
             console.log('User is Worker - showing limited access');
             entryFormsSection.style.display = 'block';
             
-            // Hide waste and space forms for workers
+            // Hide classroom waste and unused space forms for workers
             const formCards = document.querySelectorAll('.form-card');
             if (formCards.length >= 3) {
-                formCards[0].style.display = 'none'; // Daily Waste
-                formCards[2].style.display = 'none'; // Unused Space
+                formCards[0].style.display = 'none'; // Daily Waste (classroom)
+                formCards[3].style.display = 'none'; // Unused Space
+            }
+            
+            // Show outdoor waste card for workers
+            const outdoorWasteCard = document.getElementById('outdoorWasteCard');
+            if (outdoorWasteCard) {
+                outdoorWasteCard.style.display = 'block';
             }
             
             // Show info message
@@ -228,7 +241,7 @@ async function loadProfile() {
                 workerMessage.style.display = 'block';
                 const messageP = workerMessage.querySelector('p');
                 if (messageP) {
-                    messageP.textContent = 'ℹ️ As a Worker, you can submit Weekly Resources reports to track furniture and equipment condition.';
+                    messageP.textContent = 'ℹ️ As a Worker, you can submit Weekly Resources reports and Outdoor Waste entries for gardens, playgrounds, and corridors.';
                 }
             }
         }
