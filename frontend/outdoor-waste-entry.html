@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outdoor Waste Entry | Echo Track Schoolcore</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="icon" type="image/png" href="images/web logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .outdoor-waste-page {
+            min-height: 100vh;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #114814 0%, #1a6b20 100%);
+        }
+
+        .outdoor-waste-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #21a300;
+        }
+
+        .page-header h1 {
+            color: #114814;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .user-info {
+            background: linear-gradient(135deg, rgba(33, 163, 0, 0.1), rgba(17, 72, 20, 0.1));
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .user-info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #114814;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #21a300;
+        }
+
+        .form-section h3 {
+            color: #114814;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #21a300;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .waste-type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .waste-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .waste-input-group label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .waste-input-group input {
+            padding: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-item input[type="checkbox"],
+        .checkbox-item input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .photo-upload-section {
+            background: white;
+            border: 2px dashed #21a300;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .photo-upload-section:hover {
+            background: rgba(33, 163, 0, 0.05);
+            border-color: #114814;
+        }
+
+        .photo-upload-section p {
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .photo-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .photo-preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .photo-preview-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .photo-remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-count {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #21a300;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #114814;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #21a300;
+            border: 2px solid #21a300;
+        }
+
+        .btn-outline:hover {
+            background: #21a300;
+            color: white;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #21a300;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .required {
+            color: red;
+            margin-left: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .waste-type-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .outdoor-waste-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <a href="profile.html">
+                        <img src="images/web logo.png" alt="Echo Track Logo">
+                    </a>
+                </div>
+            </div>
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="profile.html">Home</a></li>
+                    <li><a href="outdoor-waste-entry.html" class="active">Outdoor Waste</a></li>
+                </ul>
+            </div>
+            <div class="nav-buttons">
+                <button onclick="logout()" class="btn btn-primary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="outdoor-waste-page">
+        <div class="outdoor-waste-container">
+            <div class="page-header">
+                <h1>🌳 Outdoor Waste Entry</h1>
+                <p>Record waste from gardens, playgrounds, corridors, and other outdoor areas</p>
+            </div>
+
+            <!-- User Info -->
+            <div class="user-info">
+                <div class="user-info-item">
+                    <span class="user-info-label">Worker Name</span>
+                    <span class="user-info-value" id="workerName">Loading...</span>
+                </div>
+                <div class="user-info-item">
+                    <span class="user-info-label">Role</span>
+                    <span class="user-info-value" id="workerRole">Worker</span>
+                </div>
+                <div class="user-info-item">
+                    <span class="user-info-label">Date</span>
+                    <span class="user-info-value" id="currentDate">Today</span>
+                </div>
+            </div>
+
+            <form id="outdoorWasteForm">
+                <!-- Location Information -->
+                <div class="form-section">
+                    <h3>📍 Location Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="areaType">Area Type <span class="required">*</span></label>
+                            <select id="areaType" name="areaType" required>
+                                <option value="">Select area type</option>
+                                <option value="Garden">Garden</option>
+                                <option value="Playground">Playground</option>
+                                <option value="Sports Field">Sports Field</option>
+                                <option value="Corridor">Corridor</option>
+                                <option value="Parking Area">Parking Area</option>
+                                <option value="Entrance">Entrance/Gate Area</option>
+                                <option value="Cafeteria Outdoor">Cafeteria Outdoor Area</option>
+                                <option value="Assembly Ground">Assembly Ground</option>
+                                <option value="Behind Building">Behind Building</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="specificLocation">Specific Location <span class="required">*</span></label>
+                            <input type="text" id="specificLocation" name="specificLocation" 
+                                   placeholder="e.g., Near Main Gate, Science Block Garden" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nearBuilding">Near Building/Block</label>
+                            <input type="text" id="nearBuilding" name="nearBuilding" 
+                                   placeholder="e.g., Main Building, Science Block">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="entryDate">Collection Date <span class="required">*</span></label>
+                            <input type="date" id="entryDate" name="entryDate" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Waste Data -->
+                <div class="form-section">
+                    <h3>🗑️ Waste Collection Data</h3>
+                    
+                    <div class="waste-type-grid">
+                        <div class="waste-input-group">
+                            <label for="paperWaste">Paper Waste (kg)</label>
+                            <input type="number" id="paperWaste" name="paperWaste" 
+                                   min="0" step="0.1" value="0" placeholder="0.0">
+                        </div>
+
+                        <div class="waste-input-group">
+                            <label for="plasticWaste">Plastic Waste (kg)</label>
+                            <input type="number" id="plasticWaste" name="plasticWaste" 
+                                   min="0" step="0.1" value="0" placeholder="0.0">
+                        </div>
+
+                        <div class="waste-input-group">
+                            <label for="organicWaste">Organic/Garden Waste (kg)</label>
+                            <input type="number" id="organicWaste" name="organicWaste" 
+                                   min="0" step="0.1" value="0" placeholder="0.0">
+                        </div>
+
+                        <div class="waste-input-group">
+                            <label for="generalWaste">General Waste (kg)</label>
+                            <input type="number" id="generalWaste" name="generalWaste" 
+                                   min="0" step="0.1" value="0" placeholder="0.0">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Total Waste: <strong id="totalWaste">0 kg</strong></label>
+                    </div>
+                </div>
+
+                <!-- Cleanliness Assessment -->
+                <div class="form-section">
+                    <h3>✨ Area Condition</h3>
+                    
+                    <div class="form-group">
+                        <label>Area Cleanliness Status <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="radio" id="cleanVeryClean" name="cleanlinessStatus" value="Very Clean" required>
+                                <label for="cleanVeryClean">Very Clean - No visible waste</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="radio" id="cleanModerate" name="cleanlinessStatus" value="Moderately Clean">
+                                <label for="cleanModerate">Moderately Clean - Minor waste present</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="radio" id="cleanNeeds" name="cleanlinessStatus" value="Needs Cleaning">
+                                <label for="cleanNeeds">Needs Cleaning - Significant waste accumulation</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="radio" id="cleanPoor" name="cleanlinessStatus" value="Poor">
+                                <label for="cleanPoor">Poor - Heavy waste accumulation</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Issues Found (Check all that apply)</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="issueScattered" name="issues" value="Scattered Waste">
+                                <label for="issueScattered">Scattered waste around area</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="issueOverflow" name="issues" value="Bin Overflow">
+                                <label for="issueOverflow">Waste bins overflowing</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="issueLeaves" name="issues" value="Fallen Leaves">
+                                <label for="issueLeaves">Excessive fallen leaves/organic matter</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="issuePlastic" name="issues" value="Plastic Bottles">
+                                <label for="issuePlastic">Plastic bottles/containers scattered</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="issueFood" name="issues" value="Food Waste">
+                                <label for="issueFood">Food waste outside designated areas</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photo Upload -->
+                <div class="form-section">
+                    <h3>📸 Photo Evidence (2-5 photos required)</h3>
+                    
+                    <div class="photo-upload-section" id="photoUploadArea">
+                        <div style="font-size: 48px;">📷</div>
+                        <p><strong>Click or drag photos here</strong></p>
+                        <p>Take photos of the waste collected and area condition</p>
+                        <p style="font-size: 12px; color: #999;">JPG, PNG up to 5MB each | Min 2 photos, Max 5 photos</p>
+                    </div>
+                    <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
+                    
+                    <div class="photo-preview-container" id="photoPreview"></div>
+                    <div class="photo-count" id="photoCount">0 photos uploaded (minimum 2 required)</div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="form-section">
+                    <h3>📝 Additional Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes & Observations</label>
+                        <textarea id="notes" name="notes" 
+                                  placeholder="Any additional information about waste collection, area condition, or recommendations..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="urgencyLevel">Priority Level</label>
+                        <select id="urgencyLevel" name="urgencyLevel">
+                            <option value="Normal">Normal - Regular collection</option>
+                            <option value="Attention">Needs Attention - Requires extra cleaning</option>
+                            <option value="Urgent">Urgent - Immediate action required</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-outline" id="saveDraftBtn">💾 Save Draft</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">❌ Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">✅ Submit Entry</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Submitting outdoor waste entry...</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                &copy; 2025 Echo Track SchoolHub. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/outdoor-waste-entry.js"></script>
+</body>
+</html>
