@@ -196,6 +196,62 @@ const dailyWasteSchema = new mongoose.Schema({
 });
 const DailyWaste = mongoose.model('DailyWaste', dailyWasteSchema);
 
+// Outdoor Waste Entry Schema (for workers - gardens, playgrounds, corridors)
+const outdoorWasteSchema = new mongoose.Schema({
+    submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    submittedByName: { type: String, required: true },
+    submittedRole: { type: String, required: true },
+    
+    // Location Information
+    areaType: { 
+        type: String, 
+        required: true,
+        enum: ['Garden', 'Playground', 'Sports Field', 'Corridor', 'Parking Area', 
+               'Entrance', 'Cafeteria Outdoor', 'Assembly Ground', 'Behind Building', 'Other']
+    },
+    specificLocation: { type: String, required: true },
+    nearBuilding: { type: String },
+    date: { type: Date, required: true },
+    
+    // Waste Categories
+    paperWaste: { type: Number, default: 0 },
+    plasticWaste: { type: Number, default: 0 },
+    organicWaste: { type: Number, default: 0 },
+    generalWaste: { type: Number, default: 0 },
+    totalWaste: { type: Number, default: 0 },
+    
+    // Area Condition
+    cleanlinessStatus: { 
+        type: String, 
+        enum: ['Very Clean', 'Moderately Clean', 'Needs Cleaning', 'Poor'],
+        required: true 
+    },
+    issues: [{ type: String }], // Array of issues found
+    
+    // Photos - Base64 storage
+    photos: [{
+        data: { type: String, required: true },
+        originalName: { type: String },
+        mimeType: { type: String },
+        size: { type: Number },
+        uploadedAt: { type: Date }
+    }],
+    
+    // Additional info
+    notes: { type: String },
+    urgencyLevel: { 
+        type: String, 
+        default: 'Normal',
+        enum: ['Normal', 'Attention', 'Urgent']
+    },
+    
+    entryType: { type: String, default: 'outdoor' }, // Marks as outdoor waste
+    
+    createdAt: { type: Date, default: Date.now }
+});
+
+const OutdoorWaste = mongoose.model('OutdoorWaste', outdoorWasteSchema);
+
 // Unused Space Entry Schema
 const unusedSpaceSchema = new mongoose.Schema({
     submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -753,6 +809,111 @@ app.post('/api/resources/weekly', authenticateToken, async (req, res) => {
 });
 
 
+// ===================== OUTDOOR WASTE ENTRY SUBMISSION =====================
+// POST /api/waste/outdoor - Submit outdoor waste entry (workers - gardens, playgrounds, etc.)
+app.post('/api/waste/outdoor', authenticateToken, async (req, res) => {
+    try {
+        console.log('📥 Received outdoor waste entry submission');
+        
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+
+        const bodyData = req.body;
+        
+        console.log('📊 Outdoor waste data:', {
+            areaType: bodyData.areaType,
+            location: bodyData.specificLocation,
+            totalWaste: bodyData.totalWaste,
+            photos: bodyData.photos?.length || 0
+        });
+
+        // Validate required fields
+        if (!bodyData.areaType || !bodyData.specificLocation || !bodyData.entryDate) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields: areaType, specificLocation, or entryDate'
+            });
+        }
+
+        // Validate photos
+        if (!bodyData.photos || bodyData.photos.length < 2) {
+            return res.status(400).json({
+                success: false,
+                message: 'At least 2 photos are required'
+            });
+        }
+
+        // Create outdoor waste entry
+        const outdoorEntry = new OutdoorWaste({
+            submittedBy: req.user.userId,
+            submittedByName: user.fullName,
+            submittedRole: user.role,
+            
+            // Location
+            areaType: bodyData.areaType,
+            specificLocation: bodyData.specificLocation,
+            nearBuilding: bodyData.nearBuilding,
+            date: new Date(bodyData.entryDate),
+            
+            // Waste amounts
+            paperWaste: parseFloat(bodyData.paperWaste) || 0,
+            plasticWaste: parseFloat(bodyData.plasticWaste) || 0,
+            organicWaste: parseFloat(bodyData.organicWaste) || 0,
+            generalWaste: parseFloat(bodyData.generalWaste) || 0,
+            totalWaste: parseFloat(bodyData.totalWaste) || 0,
+            
+            // Condition
+            cleanlinessStatus: bodyData.cleanlinessStatus,
+            issues: bodyData.issues || [],
+            
+            // Photos (Base64)
+            photos: bodyData.photos,
+            
+            // Additional
+            notes: bodyData.notes,
+            urgencyLevel: bodyData.urgencyLevel || 'Normal',
+            entryType: 'outdoor'
+        });
+
+        await outdoorEntry.save();
+
+        console.log('✅ Outdoor waste entry saved:', outdoorEntry._id);
+
+        res.status(201).json({ 
+            success: true, 
+            message: 'Outdoor waste entry submitted successfully',
+            entry: {
+                _id: outdoorEntry._id,
+                areaType: outdoorEntry.areaType,
+                specificLocation: outdoorEntry.specificLocation,
+                totalWaste: outdoorEntry.totalWaste,
+                photosCount: outdoorEntry.photos.length
+            }
+        });
+    } catch (error) {
+        console.error('❌ Submit outdoor waste entry error:', error);
+        
+        let errorMessage = 'Server error';
+        if (error.name === 'ValidationError') {
+            errorMessage = 'Validation error: ' + Object.values(error.errors).map(e => e.message).join(', ');
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: errorMessage
+        });
+    }
+});
+
+
 // ===================== UNUSED SPACE ROUTES =====================
 
 // Submit Unused Space Entry
@@ -993,6 +1154,51 @@ app.get('/api/waste/daily', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('Get waste entries error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// ===================== GET OUTDOOR WASTE ENTRIES =====================
+app.get('/api/waste/outdoor', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+        
+        let query = {};
+        
+        const managementRoles = [
+            'Principal',
+            'Management Staff',
+            'Deputy Principal',
+            'Assistant Principal',
+            'Section Head'
+        ];
+        
+        // Non-management users only see their own entries
+        if (!managementRoles.includes(user.role)) {
+            query.submittedBy = req.user.userId;
+        }
+
+        const entries = await OutdoorWaste.find(query)
+            .sort({ date: -1, createdAt: -1 })
+            .limit(100)
+            .lean();
+
+        console.log('✅ Found', entries.length, 'outdoor waste entries');
+
+        res.json({ 
+            success: true, 
+            entries: entries,
+            count: entries.length 
+        });
+    } catch (error) {
+        console.error('Get outdoor waste entries error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
