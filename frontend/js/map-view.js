@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     initializeMap();
+    
+    // Show map immediately after initialization (don't wait for data)
+    document.getElementById('loadingMap').style.display = 'none';
+    document.getElementById('map').style.display = 'block';
+    
     await loadAllMapData();
     initializeFilters();
 });
@@ -44,8 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initializeMap() {
     // IMPORTANT: Replace these coordinates with your school's exact location
     // Anuradhapura Central College coordinates
-    const schoolLat = 8.335393;  // Replace with actual latitude
-    const schoolLng = 80.407380; // Replace with actual longitude
+    const schoolLat = 8.3114;  // Replace with actual latitude
+    const schoolLng = 80.4037; // Replace with actual longitude
 
     // Create map
     map = L.map('map').setView([schoolLat, schoolLng], 18); // Zoom 18 = building level
@@ -96,6 +101,12 @@ function initializeMap() {
 
     // Add all marker layers to map
     Object.values(markerLayers).forEach(layer => layer.addTo(map));
+
+    // Force map to display immediately
+    setTimeout(() => {
+        map.invalidateSize(); // Recalculate map size
+        console.log('✅ Map invalidated and resized');
+    }, 100);
 
     console.log('✅ Map initialized');
 }
@@ -157,10 +168,6 @@ async function loadAllMapData() {
 
         // Update counts
         updateMarkerCounts();
-
-        // Hide loading, show map
-        document.getElementById('loadingMap').classList.add('hidden');
-        document.getElementById('map').style.display = 'block';
 
         // Update last update time
         document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
