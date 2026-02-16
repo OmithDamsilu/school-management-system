@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initializeMap() {
     // IMPORTANT: Replace these coordinates with your school's exact location
     // Anuradhapura Central College coordinates
-    const schoolLat = 8.3114;  // Replace with actual latitude
-    const schoolLng = 80.4037; // Replace with actual longitude
+    const schoolLat = 8.336067;   // Replace with actual latitude
+    const schoolLng = 80.406833; // Replace with actual longitude
 
     // Create map
     map = L.map('map').setView([schoolLat, schoolLng], 18); // Zoom 18 = building level
