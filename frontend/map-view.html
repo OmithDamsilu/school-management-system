@@ -15,11 +15,15 @@
         .map-page {
             min-height: 100vh;
             padding: 40px 20px;
+            background: white; /* Solid white background */
         }
 
         .map-container {
             max-width: 1400px;
             margin: 0 auto;
+            background: white; /* Ensure container has white background */
+            position: relative;
+            z-index: 1;
         }
 
         .page-header {
@@ -90,6 +94,8 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             background: white;
+            position: relative;
+            z-index: 10; /* Ensure map is above any background elements */
         }
 
         .map-filters {
